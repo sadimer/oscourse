@@ -103,17 +103,80 @@ InitGraphics (
     DEBUG ((DEBUG_ERROR, "JOS: Cannot find GOP protocol - %r\n", Status));
     return Status;
   }
-
-  //
-  // LAB 1: Your code here.
-  //
-  // Switch to the maximum or any other resolution of your preference.
-  // Refer to Graphics Output Protocol description in UEFI spec for
-  // more details.
-  //
-  // Hint: Use GetMode/SetMode functions.
-  //
-
+  /**
+  UINTN MaxMode  = GraphicsOutput->Mode->MaxMode;
+  UINT32 Modes;
+  for (Modes = 0; Modes < MaxMode; Modes++) {    
+    GraphicsOutput->SetMode(GraphicsOutput, Modes);
+    DEBUG ((DEBUG_INFO, "JOS: HorizontalResolution №%d %d\n", Modes, GraphicsOutput->Mode->Info->HorizontalResolution));
+    DEBUG ((DEBUG_INFO, "JOS: VerticalResolution №%d %d\n", Modes, GraphicsOutput->Mode->Info->VerticalResolution));
+  }
+  **/
+  
+  GraphicsOutput->SetMode(GraphicsOutput, 22);
+  
+  /**
+    JOS: HorizontalResolution №0 640
+    JOS: VerticalResolution №0 480
+    JOS: HorizontalResolution №1 800
+    JOS: VerticalResolution №1 480
+    JOS: HorizontalResolution №2 800
+    JOS: VerticalResolution №2 600
+    JOS: HorizontalResolution №3 832
+    JOS: VerticalResolution №3 624
+    JOS: HorizontalResolution №4 960
+    JOS: VerticalResolution №4 640
+    JOS: HorizontalResolution №5 1024
+    JOS: VerticalResolution №5 600
+    JOS: HorizontalResolution №6 1024
+    JOS: VerticalResolution №6 768
+    JOS: HorizontalResolution №7 1152
+    JOS: VerticalResolution №7 864
+    JOS: HorizontalResolution №8 1152
+    JOS: VerticalResolution №8 870
+    JOS: HorizontalResolution №9 1280
+    JOS: VerticalResolution №9 720
+    JOS: HorizontalResolution №10 1280
+    JOS: VerticalResolution №10 760
+    JOS: HorizontalResolution №11 1280
+    JOS: VerticalResolution №11 768
+    JOS: HorizontalResolution №12 1280
+    JOS: VerticalResolution №12 800
+    JOS: HorizontalResolution №13 1280
+    JOS: VerticalResolution №13 960
+    JOS: HorizontalResolution №14 1280
+    JOS: VerticalResolution №14 1024
+    JOS: HorizontalResolution №15 1360
+    JOS: VerticalResolution №15 768
+    JOS: HorizontalResolution №16 1366
+    JOS: VerticalResolution №16 768
+    JOS: HorizontalResolution №17 1400
+    JOS: VerticalResolution №17 1050
+    JOS: HorizontalResolution №18 1440
+    JOS: VerticalResolution №18 900
+    JOS: HorizontalResolution №19 1600
+    JOS: VerticalResolution №19 900
+    JOS: HorizontalResolution №20 1600
+    JOS: VerticalResolution №20 1200
+    JOS: HorizontalResolution №21 1680
+    JOS: VerticalResolution №21 1050
+    JOS: HorizontalResolution №22 1920
+    JOS: VerticalResolution №22 1080
+    JOS: HorizontalResolution №23 1920
+    JOS: VerticalResolution №23 1200
+    JOS: HorizontalResolution №24 1920
+    JOS: VerticalResolution №24 1440
+    JOS: HorizontalResolution №25 2000
+    JOS: VerticalResolution №25 2000
+    JOS: HorizontalResolution №26 2048
+    JOS: VerticalResolution №26 1536
+    JOS: HorizontalResolution №27 2048
+    JOS: VerticalResolution №27 2048
+    JOS: HorizontalResolution №28 2560
+    JOS: VerticalResolution №28 1440
+    JOS: HorizontalResolution №29 2560
+    JOS: VerticalResolution №29 1600
+  **/
 
   //
   // Fill screen with black.
@@ -976,7 +1039,7 @@ UefiMain (
   EFI_EVENT          VirtualNotifyEvent;
   UINTN              EntryPoint;
   VOID               *GateData;
-
+/**
 #if 1 ///< Uncomment to await debugging
   volatile BOOLEAN   Connected;
   DEBUG ((DEBUG_INFO, "JOS: Awaiting debugger connection\n"));
@@ -986,7 +1049,7 @@ UefiMain (
     ;
   }
 #endif
-
+**/
   Status = gRT->GetTime (&Now, NULL);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "JOS: Error when getting time - %r\n", Status));
