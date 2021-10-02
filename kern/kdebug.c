@@ -6,6 +6,7 @@
 #include <inc/x86.h>
 
 #include <kern/kdebug.h>
+#include <kern/env.h>
 #include <inc/uefi.h>
 
 void
@@ -74,7 +75,7 @@ debuginfo_rip(uintptr_t addr, struct Ripdebuginfo *info) {
     /* Find function name corresponding to given address.
     * Hint: note that we need the address of `call` instruction, but rip holds
     * address of the next instruction, so we should substract 5 from it.
-    * Hint: use function_by_info from kern/dwarf_lines.c
+    * Hint: use function_by_info from kern/dwarf.c
     * Hint: info->rip_fn_name can be not NULL-terminated,
     * string returned by function_by_info will always be */
 
@@ -92,7 +93,9 @@ uintptr_t
 find_function(const char *const fname) {
     /* There are two functions for function name lookup.
      * address_by_fname, which looks for function name in section .debug_pubnames
-     * and naive_address_by_fname which performs full traversal of DIE tree */
+     * and naive_address_by_fname which performs full traversal of DIE tree.
+     * It may also be useful to look to kernel symbol table for symbols defined
+     * in assembly. */
 
     // LAB 3: Your code here:
 
