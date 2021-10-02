@@ -70,7 +70,7 @@ debuginfo_rip(uintptr_t addr, struct Ripdebuginfo *info) {
     /* Find function name corresponding to given address.
     * Hint: note that we need the address of `call` instruction, but rip holds
     * address of the next instruction, so we should substract 5 from it.
-    * Hint: use function_by_info from kern/dwarf_lines.c
+    * Hint: use function_by_info from kern/dwarf.c
     * Hint: info->rip_fn_name can be not NULL-terminated,
     * string returned by function_by_info will always be */
 
