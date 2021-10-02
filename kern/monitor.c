@@ -79,7 +79,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf) {
         if (res == 0) {
           cprintf("         %s:%d: %s+%lu\n", debug_info.rip_file, debug_info.rip_line, debug_info.rip_fn_name, rip - debug_info.rip_fn_addr);
         } else {
-          cprintf("         Information not available...\n");
+          cprintf("         information not available...\n");
         }
         rbp = (uint64_t) *(uint64_t *)rbp;
         rip = (uint64_t) *((uint64_t *)rbp + 1);
