@@ -87,9 +87,15 @@ void
 env_init(void) {
 
     /* Set up envs array */
-
     // LAB 3: Your code here
-
+    int i;
+    env_free_list = NULL;
+    for (i = 0, i < NENV; i++) {
+        envs[NENV - i - 1].env_status = ENV_FREE;
+        envs[NENV - i - 1].env_id = 0;
+        envs[NENV - i - 1].env_link = env_free_list;
+        env_free_list = &envs[NENV - i - 1];
+    }
 }
 
 /* Allocates and initializes a new environment.
