@@ -25,8 +25,7 @@ sched_yield(void) {
      * below to halt the cpu */
 
     // LAB 3: Your code here:
-
-
+    env_run(&envs[0]);
 
     cprintf("Halt\n");
 
