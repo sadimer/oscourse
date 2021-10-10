@@ -45,7 +45,6 @@ sched_yield(void) {
 		}
 	}
     cprintf("Halt\n");
-
     /* No runnable environments,
      * so just halt the cpu */
     sched_halt();
