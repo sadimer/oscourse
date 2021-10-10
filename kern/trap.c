@@ -215,7 +215,6 @@ trap_dispatch(struct Trapframe *tf) {
         // LAB 4: Your code here
         rtc_check_status();
 		pic_send_eoi(IRQ_CLOCK);
-        //pic_send_eoi(rtc_check_status());
 		sched_yield();
         return;
     default:

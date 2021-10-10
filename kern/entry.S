@@ -10,15 +10,13 @@
 
 .globl entry
 entry:
-    # LAB 4
-    cli
+	cli
     # Set up kernel stack
     leaq bootstacktop(%rip),%rsp
     xor %ebp, %ebp
 
     # Save LoadParams in uefi_lp.
     movq %rcx, uefi_lp(%rip)
-
     # Invoke C code
     call i386_init
     # Should never reach this place
@@ -47,6 +45,7 @@ save_trapframe_syscall:
     # fallthrough
 
 save_trapframe:
+	cli
     # Guard to avoid hard to debug errors due to cli misusage.
     orl $FL_IF, saved_rflags(%rip)
 
@@ -76,8 +75,7 @@ sys_yield:
 .globl sys_exit
 .type  sys_exit, @function
 sys_exit:
-    # LAB 4:
-    cli
+	cli
     leaq bootstacktop(%rip), %rsp
     xor %ebp, %ebp
     call csys_exit
