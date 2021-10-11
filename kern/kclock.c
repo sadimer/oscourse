@@ -8,7 +8,7 @@
 /* HINT: Note that selected CMOS
  * register is reset to the first one
  * after first access, i.e. it needs to be selected
- * no every access.
+ * on every access.
  *
  * Don't forget to disable NMI for the time of
  * operation (look up for the appropriate constant in kern/kclock.h)
