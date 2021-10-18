@@ -11,6 +11,8 @@
 #include <kern/console.h>
 #include <kern/monitor.h>
 #include <kern/kdebug.h>
+#include <kern/tsc.h>
+#include <kern/timer.h>
 #include <kern/env.h>
 #include <kern/trap.h>
 #include <kern/kclock.h>
@@ -24,6 +26,9 @@ int mon_kerninfo(int argc, char **argv, struct Trapframe *tf);
 int mon_backtrace(int argc, char **argv, struct Trapframe *tf);
 int mon_hello(int argc, char **argv, struct Trapframe *tf);
 int mon_dumpcmos(int argc, char **argv, struct Trapframe *tf);
+int mon_start(int argc, char **argv, struct Trapframe *tf);
+int mon_stop(int argc, char **argv, struct Trapframe *tf);
+int mon_frequency(int argc, char **argv, struct Trapframe *tf);
 
 struct Command {
     const char *name;
@@ -111,6 +116,9 @@ mon_dumpcmos(int argc, char **argv, struct Trapframe *tf) {
 	cprintf("\n");
     return 0;
 }
+
+/* Implement timer_start (mon_start), timer_stop (mon_stop), timer_freq (mon_frequency) commands. */
+// LAB 5: Your code here:
 
 /* Kernel monitor command interpreter */
 
