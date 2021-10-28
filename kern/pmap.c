@@ -534,8 +534,8 @@ detect_memory(void) {
     /* Attach first page as reserved memory */
     // LAB 6: Your code here
 
-    /* Attach memory that kernel stored in kerenl and old IO memory
-     * (from 0 to the physical address of end label. end points the the
+    /* Attach kernel and old IO memory
+     * (from IOPHYSMEM to the physical address of end label. end points the the
      *  end of kernel executable image.)*/
     // LAB 6: Your code here
 
