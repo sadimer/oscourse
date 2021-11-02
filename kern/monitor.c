@@ -17,9 +17,11 @@
 #include <kern/pmap.h>
 #include <kern/trap.h>
 #include <kern/kclock.h>
+#include <kern/pmap.h>
 
 #define WHITESPACE "\t\r\n "
 #define MAXARGS    16
+
 
 /* Functions implementing monitor commands */
 int mon_help(int argc, char **argv, struct Trapframe *tf);
@@ -48,6 +50,7 @@ static struct Command commands[] = {
         {"timer_start", "Start timer", mon_start},
 		{"timer_stop", "Stop timer", mon_stop},
 		{"timer_freq", "Count processor frequency", mon_frequency},
+		{"memory", "Dump memory lists", mon_memory}
 };
 #define NCOMMANDS (sizeof(commands) / sizeof(commands[0]))
 
@@ -153,6 +156,11 @@ mon_frequency(int argc, char **argv, struct Trapframe *tf) {
  * This command should call dump_memory_lists()
  */
 // LAB 6: Your code here
+int
+mon_memory(int argc, char **argv, struct Trapframe *tf) {
+	dump_memory_lists();
+    return 0;
+}
 
 /* Kernel monitor command interpreter */
 
