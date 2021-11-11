@@ -93,11 +93,12 @@ env_init(void) {
     /* Allocate envs array with kzalloc_region
      * (don't forget about rounding) */
     // LAB 8: Your code here
-
+	envs = (struct Env *)kzalloc_region(sizeof(*envs) * NENV);
+    memset(envs, 0, sizeof(*envs) * NENV);
     /* Map envs to UENVS read-only,
      * but user-accessible (with PROT_USER_ set) */
     // LAB 8: Your code here
-
+	map_region(current_space, UENVS, &kspace, (uintptr_t)envs, UENVS_SIZE, PROT_R | PROT_USER_);
     /* Set up envs array */
     // LAB 3: Your code here
     int i;
@@ -289,20 +290,26 @@ bind_functions(struct Env *env, uint8_t *binary, size_t size, uintptr_t image_st
 static int
 load_icode(struct Env *env, uint8_t *binary, size_t size) {
     // LAB 3: Your code here
+    // LAB 8: Your code here
     struct Elf *elf = (struct Elf *) binary;
     if (elf->e_magic == ELF_MAGIC) {
+		switch_address_space(&env->address_space);
         struct Proghdr *ph = (struct Proghdr *)(binary + elf->e_phoff);
         int i, phnum = (int) elf->e_phnum;
         for (i = 0; i < phnum; i++) {
             if (ph[i].p_type == ELF_PROG_LOAD) {
+				uintptr_t start_aligned = ROUNDDOWN((uintptr_t)ph->p_va, PAGE_SIZE);
+				uintptr_t end_aligned = ROUNDUP((uintptr_t)ph->p_va + ph->p_memsz, PAGE_SIZE);
+				map_region(&env->address_space, start_aligned, NULL, 0, end_aligned - start_aligned, PROT_RWX | PROT_USER_ | ALLOC_ZERO);
                 memcpy((void *)ph[i].p_va, binary + ph[i].p_offset, ph[i].p_filesz);
                 memset((void *)ph[i].p_va + ph[i].p_filesz, 0, ph[i].p_memsz - ph[i].p_filesz);
             }
         }
         env->env_tf.tf_rip = elf->e_entry;
+        map_region(&env->address_space, USER_STACK_TOP - USER_STACK_SIZE, NULL, 0, USER_STACK_SIZE, PROT_R | PROT_W | PROT_USER_ | ALLOC_ZERO);
+        switch_address_space(&kspace);
         bind_functions(env, binary, size, elf->e_entry, elf->e_entry + size);
     }
-    // LAB 8: Your code here
     return 0;
 }
 
@@ -321,6 +328,7 @@ env_create(uint8_t *binary, size_t size, enum EnvType type) {
         panic("Can't allocate new environment\n");
     }
     load_icode(new, binary, size);
+    new->binary = binary;
 }
 
 
@@ -366,6 +374,9 @@ env_destroy(struct Env *env) {
         sched_yield();
     }
     // LAB 8: Your code here (set in_page_fault = 0)
+    if (env->env_tf.tf_trapno == T_PGFLT) {
+		in_page_fault = 0;
+	}
 }
 
 #ifdef CONFIG_KSPACE
@@ -450,6 +461,7 @@ env_run(struct Env *env) {
     }
     
     // LAB 3: Your code here
+    // LAB 8: Your code here
     if (curenv) {
         if (curenv->env_status == ENV_RUNNING) {
             curenv->env_status = ENV_RUNNABLE;
@@ -458,8 +470,8 @@ env_run(struct Env *env) {
     curenv = env;
     curenv->env_status = ENV_RUNNING;
     curenv->env_runs++;
+    switch_address_space(&curenv->address_space);
     env_pop_tf(&curenv->env_tf);
-    // LAB 8: Your code here
 
     while(1) {}
 }

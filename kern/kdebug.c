@@ -138,12 +138,14 @@ find_function(const char *const fname) {
      * in assembly. */
 
     // LAB 3: Your code here:
+    extern void sys_exit(void);
     if (!strncmp(fname, "sys_exit", 256)) {
 		return (uintptr_t)sys_exit;
     }
+    extern void sys_yield(void);
     if (!strncmp(fname, "sys_yield", 256)) {
 		return (uintptr_t)sys_yield;
-    }
+	}
     struct Dwarf_Addrs addr;
 	load_kernel_dwarf_info(&addr);
 	uintptr_t offset = 0;

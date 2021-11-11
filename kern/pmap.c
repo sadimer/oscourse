@@ -682,7 +682,7 @@ dump_page_table(pte_t *pml4) {
     // LAB 7: Your code here
     for (size_t i = NUSERPML4; i < PML4_ENTRY_COUNT; i++) {
         pdpe_t *pdp = (pdpe_t *) KADDR(PTE_ADDR(pml4[i]));
-        for (size_t j = 0; i < PDP_ENTRY_COUNT; j++) {
+        for (size_t j = 0; j < PDP_ENTRY_COUNT; j++) {
             if (pdp[j] & PTE_PS) {
                 dump_entry(pdp[j], 1 * GB, 0);
                 continue;
@@ -1529,17 +1529,20 @@ init_address_space(struct AddressSpace *space) {
     /* Allocte page table with alloc_pt into space->cr3
      * (remember to clean flag bits of result with PTE_ADDR) */
     // LAB 8: Your code here
-
+	pte_t pte = 0;
+    alloc_pt(&pte);
+    space->cr3 = PTE_ADDR(pte);
     /* put its kernel virtual address to space->pml4 */
     // LAB 8: Your code here
-
+	space->pml4 = KADDR(pte);
     // Allocate virtual tree root node
     // of type INTERMEDIATE_NODE with alloc_rescriptor() of type
     // LAB 8: Your code here
-
+	space->root = alloc_descriptor(INTERMEDIATE_NODE);
     /* Initialize UVPT */
     // LAB 8: Your code here
-
+	memset(space->pml4, 0, CLASS_SIZE(0));
+    space->pml4[PML4_INDEX(UVPT)] = space->cr3 | PTE_P | PTE_U;
     /* Why this call is required here and what does it do? */
     propagate_one_pml4(space, &kspace);
     return 0;
@@ -1951,6 +1954,24 @@ static uintptr_t user_mem_check_addr;
 int
 user_mem_check(struct Env *env, const void *va, size_t len, int perm) {
     // LAB 8: Your code here
+    const void *end = va + len;
+    const void *va_1 = va;
+    va = (void *)ROUNDDOWN(va, PAGE_SIZE);
+    struct Page *root = env->address_space.root;
+    while (va < end) {
+        struct Page *smallest_page = page_lookup_virtual(root, (uintptr_t)va, 0, 0);
+        if (!smallest_page->phy) {
+			if ((smallest_page->state & PAGE_PROT(perm)) != PAGE_PROT(perm)) {
+				user_mem_check_addr = (uintptr_t)MAX(va, va_1);
+				return -E_FAULT;
+			}
+        }
+        va += PAGE_SIZE;
+    }
+    if ((uintptr_t)end > MAX_USER_READABLE) {
+        user_mem_check_addr = MAX(MAX_USER_READABLE, (uintptr_t)va_1);
+        return -E_FAULT;
+    }
     return -E_FAULT;
 }
 
