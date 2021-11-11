@@ -338,6 +338,8 @@ pmtimer_cpu_frequency(void) {
     // LAB 5: Your code here
     uint32_t first = pmtimer_get_timeval();
     uint64_t first_tsc = read_tsc();
+    cprintf("%ld\n", first_tsc);
+    cprintf("%d\n", first);
     uint32_t next = first;
     uint64_t d = 0;
     uint64_t eps = PM_FREQ / 10;
@@ -348,7 +350,7 @@ pmtimer_cpu_frequency(void) {
         } else if (first - next > 0) {
             d = next - first + 0xFFFFFFFF;
         } else {
-            d = next- first;
+            d = next - first;
         }
     }
     uint64_t next_tsc = read_tsc();

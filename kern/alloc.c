@@ -29,9 +29,9 @@ test_alloc(uint8_t nbytes) {
 
     /* Make allocator thread-safe with the help of spin_lock/spin_unlock. */
     // LAB 5: Your code here
-	spin_lock(&kernel_lock);
+	//spin_lock(&kernel_lock);
     size_t nunits = (nbytes + sizeof(Header) - 1) / sizeof(Header) + 1;
-
+	
     /* no free list yet */
     if (!freep) {
         Header *hd = (Header *)&space;
@@ -42,8 +42,8 @@ test_alloc(uint8_t nbytes) {
 
         freep = &base;
     }
-
-    check_list();
+    spin_lock(&kernel_lock);
+    //check_list();
 
     for (Header *p = freep->next;; p = p->next) {
         /* big enough */
@@ -58,6 +58,8 @@ test_alloc(uint8_t nbytes) {
                 p += p->size;
                 p->size = nunits;
             }
+            spin_unlock(&kernel_lock);
+            cprintf("%p", p + 1);
             return (void *)(p + 1);
         }
 
