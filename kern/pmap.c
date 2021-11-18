@@ -493,6 +493,8 @@ dump_memory_lists(void) {
     EFI_MEMORY_DESCRIPTOR *end = (void *)(uefi_lp->MemoryMap + uefi_lp->MemoryMapSize);
     uint64_t max_mem_addr = 0;
     uint64_t min_mem_addr = start->PhysicalStart;
+    uint64_t mymax = min_mem_addr;
+    uint64_t mymin = max_mem_addr;
     while (start < end) {
         max_mem_addr = MAX(start->NumberOfPages * EFI_PAGE_SIZE + start->PhysicalStart, max_mem_addr);
         min_mem_addr = MIN(start->PhysicalStart, min_mem_addr);
@@ -507,10 +509,18 @@ dump_memory_lists(void) {
 		}
         for (uint64_t j = 0; j < num; j++) {
             if ((page = page_lookup(NULL, min_mem_addr + j * cur_size, i, ALLOCATABLE_NODE, 0)) && page->state == ALLOCATABLE_NODE) {
-                cprintf("physical page address: %lx    size: %llu\n", (uint64_t)page->addr << CLASS_BASE, CLASS_SIZE(page->class));
-            } 
+				if (page->class == 0) {
+					if (((uint64_t)page->addr << CLASS_BASE) > mymax) {
+						mymax = ((uint64_t)page->addr << CLASS_BASE);
+					} 
+					if (((uint64_t)page->addr << CLASS_BASE) < mymin) {
+						mymin = ((uint64_t)page->addr << CLASS_BASE);
+					}
+				}
+			}
         }
     }
+    cprintf("physical page address: %lx - %lx\n", mymin, mymax);
 }
 
 /*
@@ -702,8 +712,13 @@ init_memory(void) {
 
     init_allocator();
     if (trace_init) cprintf("Memory allocator is initiallized\n");
-
     detect_memory();
+	struct Page *p = alloc_page(0, ALLOC_POOL), *old = NULL;
+    while(p) {
+		old = p;
+		p = alloc_page(0, ALLOC_POOL);
+	}
+	page_unref(old);
     check_physical_tree(&root);
     if (trace_init) cprintf("Physical memory tree is correct\n");
 }
