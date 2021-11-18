@@ -1531,7 +1531,8 @@ init_address_space(struct AddressSpace *space) {
     // LAB 8: Your code here
 	pte_t pte = 0;
     alloc_pt(&pte);
-    space->cr3 = PTE_ADDR(pte);
+    pte = PTE_ADDR(pte);
+    space->cr3 = (uintptr_t)pte;
     /* put its kernel virtual address to space->pml4 */
     // LAB 8: Your code here
 	space->pml4 = KADDR(pte);
@@ -1541,7 +1542,6 @@ init_address_space(struct AddressSpace *space) {
 	space->root = alloc_descriptor(INTERMEDIATE_NODE);
     /* Initialize UVPT */
     // LAB 8: Your code here
-	memset(space->pml4, 0, CLASS_SIZE(0));
     space->pml4[PML4_INDEX(UVPT)] = space->cr3 | PTE_P | PTE_U;
     /* Why this call is required here and what does it do? */
     propagate_one_pml4(space, &kspace);
@@ -1954,25 +1954,22 @@ static uintptr_t user_mem_check_addr;
 int
 user_mem_check(struct Env *env, const void *va, size_t len, int perm) {
     // LAB 8: Your code here
+    const void *current = (void *)ROUNDDOWN(va, PAGE_SIZE);
     const void *end = va + len;
-    const void *va_1 = va;
-    va = (void *)ROUNDDOWN(va, PAGE_SIZE);
-    struct Page *root = env->address_space.root;
-    while (va < end) {
-        struct Page *smallest_page = page_lookup_virtual(root, (uintptr_t)va, 0, 0);
-        if (!smallest_page->phy) {
-			if ((smallest_page->state & PAGE_PROT(perm)) != PAGE_PROT(perm)) {
-				user_mem_check_addr = (uintptr_t)MAX(va, va_1);
-				return -E_FAULT;
-			}
+    struct Page *user_root = env->address_space.root;
+    while (current < end) {
+        struct Page *page = page_lookup_virtual(user_root, (uintptr_t)current, 0, 0);
+        if (!page->phy || (page->state & PAGE_PROT(perm)) != PAGE_PROT(perm)) {
+            user_mem_check_addr = (uintptr_t)(MAX(va, current));
+            return -E_FAULT;
         }
-        va += PAGE_SIZE;
+        current += PAGE_SIZE;
     }
     if ((uintptr_t)end > MAX_USER_READABLE) {
-        user_mem_check_addr = MAX(MAX_USER_READABLE, (uintptr_t)va_1);
+        user_mem_check_addr = MAX(MAX_USER_READABLE, (uintptr_t)current);
         return -E_FAULT;
     }
-    return -E_FAULT;
+    return 0;
 }
 
 void

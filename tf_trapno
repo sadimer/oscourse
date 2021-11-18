@@ -1,0 +1,45 @@
+grade-lab1:# -*- coding: utf-8 -*-
+grade-lab3:# -*- coding: utf-8 -*-
+grade-lab4:# -*- coding: utf-8 -*-
+grade-lab5:# -*- coding: utf-8 -*-
+grade-lab6:# -*- coding: utf-8 -*-
+grade-lab7:# -*- coding: utf-8 -*-
+grade-lab8:# -*- coding: utf-8 -*-
+gradelib.py:        self.output = self.outbytes.decode("utf-8", "replace")
+gradelib.py:                line = line.decode("utf-8", "replace")
+kern/trap.c:    print_regs(&tf->tf_regs);
+kern/trap.c:    cprintf("  es   0x----%04x\n", tf->tf_es);
+kern/trap.c:    cprintf("  ds   0x----%04x\n", tf->tf_ds);
+kern/trap.c:    cprintf("  trap 0x%08lx %s\n", (unsigned long)tf->tf_trapno, trapname(tf->tf_trapno));
+kern/trap.c:    if (tf == last_tf && tf->tf_trapno == T_PGFLT)
+kern/trap.c:    cprintf("  err  0x%08lx", (unsigned long)tf->tf_err);
+kern/trap.c:    if (tf->tf_trapno == T_PGFLT) {
+kern/trap.c:                tf->tf_err & FEC_U ? "user" : "kernel",
+kern/trap.c:                tf->tf_err & FEC_W ? "write" : tf->tf_err & FEC_I ? "execute" :
+kern/trap.c:                tf->tf_err & FEC_P ? "protection" : "not-present");
+kern/trap.c:    cprintf("  rip  0x%08lx\n", (unsigned long)tf->tf_rip);
+kern/trap.c:    cprintf("  cs   0x----%04x\n", tf->tf_cs);
+kern/trap.c:    cprintf("  flag 0x%08lx\n", (unsigned long)tf->tf_rflags);
+kern/trap.c:    cprintf("  rsp  0x%08lx\n", (unsigned long)tf->tf_rsp);
+kern/trap.c:    cprintf("  ss   0x----%04x\n", tf->tf_ss);
+kern/trap.c:    switch (tf->tf_trapno) {
+kern/trap.c:        tf->tf_regs.reg_rax = syscall(
+kern/trap.c:                tf->tf_regs.reg_rax,
+kern/trap.c:                tf->tf_regs.reg_rdx,
+kern/trap.c:                tf->tf_regs.reg_rcx,
+kern/trap.c:                tf->tf_regs.reg_rbx,
+kern/trap.c:                tf->tf_regs.reg_rdi,
+kern/trap.c:                tf->tf_regs.reg_rsi,
+kern/trap.c:                tf->tf_regs.reg_r8);
+kern/trap.c:        if (!(tf->tf_cs & 3))
+kern/trap.c:    if (trace_traps) cprintf("Incoming TRAP[%ld] frame at %p\n", tf->tf_trapno, tf);
+kern/trap.c:    if (tf->tf_trapno == T_PGFLT) {
+kern/trap.c:        if ((tf->tf_err & ~FEC_W) == FEC_U && curenv && SANITIZE_USER_SHADOW_BASE <= va &&
+kern/trap.c:            cprintf("<%p> Page fault ip=%08lX va=%08lX err=%c%c%c%c%c -> %s\n", current_space, tf->tf_rip, va,
+kern/trap.c:                    tf->tf_err & FEC_P ? 'P' : '-',
+kern/trap.c:                    tf->tf_err & FEC_U ? 'U' : '-',
+kern/trap.c:                    tf->tf_err & FEC_W ? 'W' : '-',
+kern/trap.c:                    tf->tf_err & FEC_R ? 'R' : '-',
+kern/trap.c:                    tf->tf_err & FEC_I ? 'I' : '-',
+lib/printfmt.c:/* Stripped-down primitive printf-style formatting routines,
+llvm/asan/asan_platform.ujos.c: * Allocate memory for shadow memory if utf->utf_fault_va
