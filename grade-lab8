@@ -92,7 +92,7 @@ def test_testbss():
     r.user_test("testbss")
     r.match('Making sure bss works right...',
             'Yes, good.  Now doing a wild write off the end...',
-            'Incoming TRAP.14. frame at 0x803fffff40',
+            'Incoming TRAP.14. frame at 0x803ffe7f40',
             '<0x80........> Page fault ip=[0-9A-F]+ va=02C..000 err=-UW-- -> fault',
             E('.$E1. free env $E1'))
 
