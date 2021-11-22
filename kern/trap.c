@@ -444,9 +444,6 @@ page_fault_handler(struct Trapframe *tf) {
     cprintf("[%09x] ENTER %p \n", curenv->env_id, curenv->env_pgfault_upcall);
     if (curenv->env_pgfault_upcall == NULL) {
         cprintf("[%09x] user fault va: %08lx ip %08lx\n", curenv->env_id, fault_va, tf->tf_rip);
-		user_mem_assert(curenv, (void *)tf->tf_rsp, sizeof(struct UTrapframe), PROT_W);
-		print_trapframe(tf);
-		env_destroy(curenv);
 		goto ret;
     }
 
@@ -489,5 +486,8 @@ page_fault_handler(struct Trapframe *tf) {
     // LAB 9: Your code here:
     env_run(curenv);
 ret:
-	env_run(NULL);
+	user_mem_assert(curenv, (void *)tf->tf_rsp, sizeof(struct UTrapframe), PROT_W | PROT_USER_);
+	print_trapframe(tf);
+	env_destroy(curenv);
+	panic("page_fault_handler is return");
 }

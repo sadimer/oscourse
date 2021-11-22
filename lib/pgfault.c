@@ -42,8 +42,10 @@ add_pgfault_handler(pf_handler_t handler) {
     if (!_pfhandler_inititiallized) {
         /* First time through! */
         // LAB 9: Your code here:
-        goto end;
+        res = sys_alloc_region(sys_getenvid(), (void*)(USER_EXCEPTION_STACK_TOP - PAGE_SIZE), PAGE_SIZE, PROT_RW);
+        _pfhandler_vec[_pfhandler_off++] = handler;
         _pfhandler_inititiallized = 1;
+        goto end;
     }
 
     for (size_t i = 0; i < _pfhandler_off; i++)
@@ -55,6 +57,7 @@ add_pgfault_handler(pf_handler_t handler) {
         _pfhandler_vec[_pfhandler_off++] = handler;
 
 end:
+	res = sys_env_set_pgfault_upcall(sys_getenvid(), _pgfault_upcall);
     if (res < 0) panic("set_pgfault_handler: %i", res);
     return res;
 }
