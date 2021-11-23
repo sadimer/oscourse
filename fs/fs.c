@@ -60,7 +60,13 @@ alloc_block(void) {
      * super->s_nblocks blocks in the disk altogether. */
 
     // LAB 10: Your code here
-
+	for (blockno_t blockno = 1; blockno < super->s_nblocks; blockno++) {
+        if (block_is_free(blockno)) {
+            CLRBIT(bitmap, blockno);
+            flush_block(&bitmap[blockno / 32]);
+            return blockno;
+        }
+    }
     return 0;
 }
 
@@ -128,9 +134,25 @@ fs_init(void) {
 int
 file_block_walk(struct File *f, blockno_t filebno, blockno_t **ppdiskbno, bool alloc) {
     // LAB 10: Your code here
-
-    *ppdiskbno = 0;
-
+    if (filebno >= NDIRECT + NINDIRECT) {
+        return -E_INVAL;
+    }
+    if (filebno < NDIRECT) {
+		*ppdiskbno = (uint32_t*)f->f_direct + filebno;
+    } else {
+		if (!f->f_indirect) {
+			if (!alloc) {
+				return -E_NOT_FOUND;
+			}
+			blockno_t block = alloc_block();
+			if (!block) {
+				return -E_NO_DISK;
+			}
+			f->f_indirect = block;
+			memset(diskaddr(f->f_indirect), 0, BLKSIZE);
+		}
+		*ppdiskbno = (uint32_t *)diskaddr(f->f_indirect) + filebno - NDIRECT;
+	}
     return 0;
 }
 
@@ -145,9 +167,19 @@ file_block_walk(struct File *f, blockno_t filebno, blockno_t **ppdiskbno, bool a
 int
 file_get_block(struct File *f, uint32_t filebno, char **blk) {
     // LAB 10: Your code here
-
-    *blk = 0;
-
+    //if (filebno >= NDIRECT + NINDIRECT) {
+    //    return -E_INVAL;
+    //}
+    uint32_t *pdiskbno;
+    file_block_walk(f, filebno, &pdiskbno, 1);
+    if (!*pdiskbno) {
+        blockno_t block = alloc_block();
+        if (!block) {
+			return -E_NO_DISK;
+		}
+        *pdiskbno = block;
+    }
+    *blk = (char *)diskaddr(*pdiskbno);
     return 0;
 }
 

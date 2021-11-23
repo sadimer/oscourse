@@ -32,7 +32,15 @@ bc_pgfault(struct UTrapframe *utf) {
      * Hint: first round addr to page boundary. fs/ide.c has code to read
      * the disk. */
     // LAB 10: Your code here
-
+    addr = ROUNDDOWN(addr, PAGE_SIZE);
+    int res = sys_alloc_region(CURENVID, addr, PAGE_SIZE, PROT_RW);
+    if (res < 0) {
+        panic("bc_pgfault.sys_alloc_region failed: %i\n", res);
+    }
+    res = ide_read(blockno * BLKSECTS, addr, BLKSECTS);
+    if (res < 0) {
+        panic("bc_pgfault.ide_read failed: %i\n", res);
+    }
     return 1;
 }
 
@@ -53,8 +61,18 @@ flush_block(void *addr) {
         panic("reading non-existent block %08x out of %08x\n", blockno, super->s_nblocks);
 
     // LAB 10: Your code here.
-
-
+	addr = ROUNDDOWN(addr, PAGE_SIZE);
+    if (!is_page_present(addr) || !is_page_dirty(addr)) {
+        return;
+    }
+    int res = ide_write(blockno * BLKSECTS, ROUNDDOWN(addr, PAGE_SIZE), BLKSECTS);
+    if (res < 0) {
+        panic("flush_block.ide_write failed: %i\n", res);
+    }
+    res = sys_map_region(CURENVID, addr, CURENVID, addr, PAGE_SIZE, get_prot(addr));
+    if (res < 0) {
+        panic("flush_block.sys_map_region failed: %i\n", res);
+    }
     assert(!is_page_dirty(addr));
 }
 
