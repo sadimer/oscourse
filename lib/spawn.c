@@ -284,6 +284,40 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
     /* read filesz to UTEMP */
     /* Map read section conents to child */
     /* Unmap it from parent */
-
+	filesz = ROUNDUP(va + filesz, PAGE_SIZE) - va;
+    if (memsz > filesz) {
+        res = sys_alloc_region(child, (void*)va + filesz, memsz - filesz, perm);
+        if (res < 0) {
+            cprintf("map_segmen.sys_alloc_regin failed: %i\n", res);
+            return res;
+        }
+    }
+    res = sys_alloc_region(CURENVID, UTEMP, filesz, PROT_RW);
+    if (res < 0) {
+        cprintf("map_segment.sys_alloc_regin failed: %i\n", res);
+        return res;
+    }
+    res = seek(fd, fileoffset);
+    if (res < 0) {
+        cprintf("map_segment.seek failed: %i\n", res);
+        return res;
+    }
+    for (int i = 0; i < filesz; i += PAGE_SIZE) {
+        res = readn(fd, UTEMP + i, PAGE_SIZE);
+        if (res < 0) {
+            cprintf("map_segment.readn failed: %i\n", res);
+            return res;
+        }
+    }
+    res = sys_map_region(CURENVID, UTEMP, child, (void*)va, filesz, perm | PROT_LAZY);
+    if (res < 0) {
+        cprintf("map_segment.sys_map_region failed: %i\n", res);
+        return res;
+    }
+    res = sys_unmap_region(CURENVID, UTEMP, filesz);
+    if (res < 0) {
+        cprintf("map_segment.sys_unmap_region failed: %i\n", res);
+        return res;
+    }
     return 0;
 }
