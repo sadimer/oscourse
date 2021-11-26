@@ -381,6 +381,22 @@ sys_ipc_recv(uintptr_t dstva, uintptr_t maxsize) {
 }
 
 /*
+ * This function sets trapframe and is unsafe
+ * so you need:
+ *   -Check environment id to be valid and accessible
+ *   -Check argument to be valid memory
+ *   -Use nosan_memcpy to copy from usespace
+ *   -Prevent privilege escalation by overriding segments
+ *   -Only allow program to set safe flags in RFLAGS register
+ *   -Force IF to be set in RFLAGS
+ */
+static int
+sys_env_set_trapframe(envid_t envid, struct Trapframe *tf) {
+    // LAB 11: Your code here
+    return 0;
+}
+
+/*
  * This function return the difference between maximal
  * number of references of regions [addr, addr + size] and [addr2,addr2+size2]
  * if addr2 is less than MAX_USER_ADDRESS, or just
@@ -405,6 +421,7 @@ syscall(uintptr_t syscallno, uintptr_t a1, uintptr_t a2, uintptr_t a3, uintptr_t
 
     // LAB 8: Your code here
     // LAB 9: Your code here
+    // LAB 11: Your code here
     if (syscallno == SYS_cputs) {
         return sys_cputs((const char *)a1, (size_t)a2);
     } else if (syscallno == SYS_cgetc) {
@@ -435,6 +452,5 @@ syscall(uintptr_t syscallno, uintptr_t a1, uintptr_t a2, uintptr_t a3, uintptr_t
     } else if (syscallno == SYS_ipc_recv) {
         return sys_ipc_recv(a1, a2);
     }
-
     return -E_NO_SYS;
 }

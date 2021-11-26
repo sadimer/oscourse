@@ -48,7 +48,7 @@ bc_pgfault(struct UTrapframe *utf) {
  * necessary, then clear the PTE_D bit using sys_page_map.
  * If the block is not in the block cache or is not dirty, does
  * nothing.
- * Hint: Use va_is_mapped, va_is_dirty, and ide_write.
+ * Hint: Use is_page_present, is_page_dirty, and ide_write.
  * Hint: Use the PTE_SYSCALL constant when calling sys_page_map.
  * Hint: Don't forget to round addr down. */
 void
