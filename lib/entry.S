@@ -6,6 +6,8 @@
 # Define the global symbols 'envs', 'vsys', 'uvpt', 'uvpd', 'uvpdp' and 'uvpml4'
 # so that they can be used in C as if they were ordinary global arrays
 # LAB 12: Your code here
+.globl vsys
+.set vsys, UVSYS
 .globl envs
 .set envs, UENVS
 .globl uvpt

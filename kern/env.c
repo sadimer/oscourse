@@ -94,9 +94,11 @@ envid2env(envid_t envid, struct Env **env_store, bool need_check_perm) {
 void
 env_init(void) {
     // LAB 12: Your code here
-
+	if (current_space != NULL) {
+        vsys = kzalloc_region(UVSYS_SIZE);
+    }
     /* kzalloc_region only works with current_space != NULL */
-
+	map_region(current_space, UVSYS, &kspace, (uintptr_t)vsys, UVSYS_SIZE, PROT_R | PROT_USER_);
     /* Allocate envs array with kzalloc_region
      * (don't forget about rounding) */
     // LAB 8: Your code here
