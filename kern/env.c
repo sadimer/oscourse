@@ -114,6 +114,7 @@ env_init(void) {
     env_free_list = NULL;
     for (i = 0; i < NENV; i++) {
         envs[NENV - i - 1].env_status = ENV_FREE;
+        strcpy(envs[NENV - i - 1].workpath,"/");
         envs[NENV - i - 1].env_id = 0;
         envs[NENV - i - 1].env_link = env_free_list;
         env_free_list = &envs[NENV - i - 1];

@@ -408,6 +408,17 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf) {
     return 0;
 }
 
+static int
+sys_env_set_workpath(envid_t envid, const char *path) {
+	struct Env* env = NULL;
+	int ret = envid2env(envid, &env, 1);
+	if (ret < 0) {
+		return ret;
+	}
+	strcpy((char *)env->workpath, path);
+	return 0;
+}
+
 /* Return date and time in UNIX timestamp format: seconds passed
  * from 1970-01-01 00:00:00 UTC. */
 static int
@@ -476,6 +487,8 @@ syscall(uintptr_t syscallno, uintptr_t a1, uintptr_t a2, uintptr_t a3, uintptr_t
         return sys_env_set_trapframe((envid_t)a1, (struct Trapframe *)a2);
 	} else if (syscallno == SYS_gettime) {
         return sys_gettime();
-    }
+    } else if (syscallno == SYS_env_set_workpath) {
+		return sys_env_set_workpath((envid_t)a1, (const char *)a2);
+	}
     return -E_NO_SYS;
 }

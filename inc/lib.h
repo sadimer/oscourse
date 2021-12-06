@@ -95,6 +95,8 @@ int sys_ipc_try_send(envid_t to_env, uint64_t value, void *pg, size_t size, int 
 int sys_ipc_recv(void *rcv_pg, size_t size);
 int sys_gettime(void);
 
+int sys_env_set_workpath(envid_t envid, const char *path);
+
 int vsys_gettime(void);
 
 /* This must be inlined. Exercise for reader: why? */
@@ -156,6 +158,11 @@ int pipeisclosed(int pipefd);
 
 /* wait.c */
 void wait(envid_t env);
+
+/* dir.c */
+int chdir(const char *path);
+char *getcwd(char *buffer, int maxlen);
+int mkdir(const char *dirname);
 
 /* File open modes */
 #define O_RDONLY  0x0000 /* open for reading only */

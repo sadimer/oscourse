@@ -26,6 +26,8 @@ typedef int32_t envid_t;
  * stands for the current environment.
  */
 
+#define MAXPATH 1000
+
 #define LOG2NENV    10
 #define NENV        (1 << LOG2NENV)
 #define ENVX(envid) ((envid) & (NENV - 1))
@@ -82,6 +84,8 @@ struct Env {
     uint32_t env_ipc_value;  /* Data value sent to us */
     envid_t env_ipc_from;    /* envid of the sender */
     int env_ipc_perm;        /* Perm of page mapping received */
+    
+    char workpath[MAXPATH];
 };
 
 #endif /* !JOS_INC_ENV_H */

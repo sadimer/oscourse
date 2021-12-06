@@ -147,3 +147,8 @@ int
 sys_gettime(void) {
     return syscall(SYS_gettime, 0, 0, 0, 0, 0, 0, 0);
 }
+
+int 
+sys_env_set_workpath(envid_t envid, const char *path) {
+	return syscall(SYS_env_set_workpath, 0, envid, (uintptr_t)path, 0, 0, 0, 0);
+}

@@ -117,6 +117,13 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             if (debug) cprintf("file_create failed: %i", res);
             return res;
         }
+    } else if (req->req_omode & O_MKDIR) {
+        if ((res = dir_create(path, &f)) < 0) {
+            if (!(req->req_omode & O_EXCL) && res == -E_FILE_EXISTS)
+                goto try_open;
+            if (debug) cprintf("dir_create failed: %i", res);
+            return res;
+        }
     } else {
     try_open:
         if ((res = file_open(path, &f)) < 0) {
@@ -124,7 +131,7 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             return res;
         }
     }
-
+    
     /* Truncate */
     if (req->req_omode & O_TRUNC) {
         if ((res = file_set_size(f, 0)) < 0) {
@@ -216,8 +223,9 @@ serve_read(envid_t envid, union Fsipc *ipc) {
 int
 serve_write(envid_t envid, union Fsipc *ipc) {
     struct Fsreq_write *req = &ipc->write;
-    if (debug)
+    if (debug) {
         cprintf("serve_write %08x %08x %08x\n", envid, req->req_fileid, (uint32_t)req->req_n);
+	}
 
     // LAB 10: Your code here
 	struct OpenFile *o;
