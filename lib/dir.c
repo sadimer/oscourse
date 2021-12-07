@@ -26,8 +26,12 @@ int chdir(const char *path) {
 
 int mkdir(const char *dirname) {
 	char cur_path[MAXPATH];
-	getcwd(cur_path, MAXPATH);
-	strcat(cur_path, dirname);
+	if (dirname[0] != '/') {
+		getcwd(cur_path, MAXPATH);
+		strcat(cur_path, dirname);
+	} else {
+		strcat(cur_path, dirname);
+	}
 	int res = open(cur_path, O_MKDIR);
 	if (res < 0) {
 		return res;

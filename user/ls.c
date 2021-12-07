@@ -1,4 +1,5 @@
 #include <inc/lib.h>
+#define MAXPATH 1000
 
 int flag[256];
 
@@ -76,8 +77,11 @@ umain(int argc, char **argv) {
             usage();
         }
 
-    if (argc == 1)
-        ls("/", "");
+    if (argc == 1) {
+		char path[MAXPATH];
+		getcwd(path, MAXPATH);
+        ls(path, "");
+	}
     else {
         for (i = 1; i < argc; i++)
             ls(argv[i], argv[i]);

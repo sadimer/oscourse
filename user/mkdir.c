@@ -6,7 +6,7 @@ void umain(int argc, char **argv) {
         return;
     }
     int res = mkdir((const char *)argv[1]);
-    if(res < 0) {
-        printf("Error on creation of %s: %d\n", argv[0], res);
+    if (res < 0) {
+        printf("Error on creation dir with %s: %d\n", argv[0], res);
 	}
 }
