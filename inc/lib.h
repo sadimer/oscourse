@@ -141,6 +141,7 @@ int open(const char *path, int mode);
 int ftruncate(int fd, off_t size);
 int remove(const char *path);
 int sync(void);
+int chmod(const char *path, int perm);
 
 /* spawn.c */
 envid_t spawn(const char *program, const char **argv);

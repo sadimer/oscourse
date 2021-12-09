@@ -275,6 +275,7 @@ fstat(int fdnum, struct Stat *stat) {
     stat->st_size = 0;
     stat->st_isdir = 0;
     stat->st_dev = dev;
+    stat->st_perm = 0;
 
     return (*dev->dev_stat)(fd, stat);
 }

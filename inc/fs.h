@@ -35,8 +35,9 @@ typedef uint32_t blockno_t;
 struct File {
     char f_name[MAXNAMELEN]; /* filename */
     off_t f_size;            /* file size in bytes */
-    uint32_t f_type;         /* file type */
-
+    uint16_t f_type;         /* file type */
+    uint8_t f_perm;			/* file permissions */
+	uint8_t f_unused;
     /* Block pointers. */
     /* A block is allocated iff its value is != 0. */
     blockno_t f_direct[NDIRECT]; /* direct blocks */
@@ -53,6 +54,10 @@ struct File {
 /* File types */
 #define FTYPE_REG 0 /* Regular file */
 #define FTYPE_DIR 1 /* Directory */
+
+#define PERM_READ 4
+#define PERM_WRITE 2
+#define PERM_EXEC 1
 
 /* File system super-block (both in-memory and on-disk) */
 
@@ -106,6 +111,7 @@ union Fsipc {
         char ret_name[MAXNAMELEN];
         off_t ret_size;
         int ret_isdir;
+        uint8_t ret_perm;
     } statRet;
     struct Fsreq_flush {
         int req_fileid;

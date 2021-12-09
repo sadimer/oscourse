@@ -36,6 +36,8 @@ USERAPPS :=		$(OBJDIR)/user/init \
 			$(OBJDIR)/user/pwd \
 			$(OBJDIR)/user/cd \
 			$(OBJDIR)/user/touch \
+			$(OBJDIR)/user/ln \
+			$(OBJDIR)/user/chmod \
 
 
 FSIMGFILES := $(FSIMGTXTFILES) $(USERAPPS)

@@ -176,3 +176,23 @@ sync(void) {
 
     return fsipc(FSREQ_SYNC, NULL);
 }
+
+int
+chmod(const char *path, int perm) {
+	char cur_path[MAXPATH];
+	if (path[0] != '/') {
+		getcwd(cur_path, MAXPATH);
+		strcat(cur_path, path);
+	} else {
+		strcat(cur_path, path);
+	}
+	struct File f;
+	int fd, n;
+	if ((fd = open(path, O_RDWR)) < 0) {
+        return fd;
+	}
+    while ((n = readn(fd, &f, sizeof f)) == sizeof f) {
+		f.f_perm = perm;
+	}
+	return 0;
+}

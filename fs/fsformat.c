@@ -105,6 +105,7 @@ opendisk(const char *name) {
     super->s_magic = FS_MAGIC;
     super->s_nblocks = nblocks;
     super->s_root.f_type = FTYPE_DIR;
+    super->s_root.f_perm = PERM_READ | PERM_WRITE | PERM_EXEC;
     strcpy(super->s_root.f_name, "/");
 
     nbitblocks = (nblocks + BLKBITSIZE - 1) / BLKBITSIZE;
@@ -152,6 +153,7 @@ diradd(struct Dir *d, uint32_t type, const char *name) {
         panic("too many directory entries");
     strcpy(out->f_name, name);
     out->f_type = type;
+    out->f_perm = PERM_READ | PERM_WRITE | PERM_EXEC;
     return out;
 }
 

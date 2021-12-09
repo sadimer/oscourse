@@ -2,7 +2,7 @@
 
 void umain(int argc, char **argv) {
     if (argc != 2) {
-        printf("Usage: mkdir <directory name>\n");
+        printf("Usage: mkdir <directory name or path>\n");
         return;
     }
     int res = mkdir((const char *)argv[1]);

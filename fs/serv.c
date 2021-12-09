@@ -256,6 +256,7 @@ serve_stat(envid_t envid, union Fsipc *ipc) {
 
     strcpy(ret->ret_name, o->o_file->f_name);
     ret->ret_size = o->o_file->f_size;
+    ret->ret_perm = o->o_file->f_perm;
     ret->ret_isdir = (o->o_file->f_type == FTYPE_DIR);
     return 0;
 }

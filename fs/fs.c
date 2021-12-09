@@ -318,6 +318,7 @@ file_create(const char *path, struct File **pf) {
 
     strcpy(filp->f_name, name);
     filp->f_type = FTYPE_REG;
+    filp->f_perm = PERM_READ | PERM_WRITE | PERM_EXEC;
     *pf = filp;
     file_flush(dir);
     return 0;
@@ -336,6 +337,7 @@ dir_create(const char *path, struct File **pf) {
 
     strcpy(filp->f_name, name);
     filp->f_type = FTYPE_DIR;
+    filp->f_perm = PERM_READ | PERM_WRITE | PERM_EXEC;
     *pf = filp;
     file_flush(dir);
     return 0;
