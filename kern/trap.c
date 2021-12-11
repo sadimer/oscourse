@@ -461,7 +461,7 @@ page_fault_handler(struct Trapframe *tf) {
     static_assert(UTRAP_RSP == offsetof(struct UTrapframe, utf_rsp), "UTRAP_RSP should be equal to RSP offset");
 	
 	uintptr_t fault_va = cr2;
-    cprintf("[%09x] ENTER %p \n", curenv->env_id, curenv->env_pgfault_upcall);
+    //cprintf("[%09x] ENTER %p \n", curenv->env_id, curenv->env_pgfault_upcall);
     if (curenv->env_pgfault_upcall == NULL) {
         cprintf("[%09x] user fault va: %08lx ip %08lx\n", curenv->env_id, fault_va, tf->tf_rip);
 		goto ret;
@@ -499,9 +499,7 @@ page_fault_handler(struct Trapframe *tf) {
     switch_address_space(old);
     /* Reset in_page_fault flag */
     // LAB 9: Your code here:
-	if (envs->env_tf.tf_trapno == T_PGFLT) {
-        in_page_fault = 0;
-    }
+    in_page_fault = 0;
     /* Rerun current environment */
     // LAB 9: Your code here:
     env_run(curenv);
