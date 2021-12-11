@@ -178,9 +178,9 @@ sys_alloc_region(envid_t envid, uintptr_t addr, size_t size, int perm) {
     if (addr > MAX_USER_ADDRESS) {
 		return -E_INVAL;
 	}
-    if (perm & ~PROT_ALL) {
+    /*if (perm & ~PROT_ALL) {
 		return -E_INVAL;
-	}
+	}*/
     if (perm & ALLOC_ONE) {
         perm &= ~ALLOC_ZERO;
     } else {
