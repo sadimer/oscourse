@@ -468,7 +468,6 @@ page_fault_handler(struct Trapframe *tf) {
         cprintf("[%09x] user fault va: %08lx ip %08lx\n", curenv->env_id, fault_va, tf->tf_rip);
 		goto ret;
     }
-
     /* Force allocation of exception stack page to prevent memcpy from
      * causing pagefault during another pagefault */
     // LAB 9: Your code here:
@@ -501,9 +500,7 @@ page_fault_handler(struct Trapframe *tf) {
     switch_address_space(old);
     /* Reset in_page_fault flag */
     // LAB 9: Your code here:
-	if (envs->env_tf.tf_trapno == T_PGFLT) {
-        in_page_fault = 0;
-    }
+    in_page_fault = 0;
     /* Rerun current environment */
     // LAB 9: Your code here:
     env_run(curenv);

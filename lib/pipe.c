@@ -41,8 +41,8 @@ pipe(int pfd[2]) {
     /* allocate the pipe structure as first data page in both */
     va = fd2data(fd0);
     if ((res = sys_alloc_region(0, va, PAGE_SIZE, PROT_RW | PROT_SHARE)) < 0) goto err2;
+	
     if ((res = sys_map_region(0, va, 0, fd2data(fd1), PAGE_SIZE, PROT_RW | PROT_SHARE)) < 0) goto err3;
-
     assert(sys_region_refs(va, PAGE_SIZE) == 2);
 
     /* set up fd structures */

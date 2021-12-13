@@ -275,7 +275,6 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
         filesz += res;
         fileoffset -= res;
     }
-
     // LAB 11: Your code here
 
     /* Allocate filesz - memsz in child */
@@ -284,7 +283,8 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
     /* read filesz to UTEMP */
     /* Map read section conents to child */
     /* Unmap it from parent */
-	filesz = ROUNDUP(va + filesz, PAGE_SIZE) - va;
+    /* Allocate filesz - memsz in child */
+    filesz = ROUNDUP(va + filesz, PAGE_SIZE) - va;
     if (memsz > filesz) {
         res = sys_alloc_region(child, (void*)va + filesz, memsz - filesz, perm);
         if (res < 0) {
