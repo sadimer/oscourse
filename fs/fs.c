@@ -237,6 +237,27 @@ dir_alloc_file(struct File *dir, struct File **file) {
     return 0;
 }
 
+static int
+dir_num_file(struct File *dir) {
+	char *blk;
+	int result = 0;
+    assert((dir->f_size % BLKSIZE) == 0);
+    blockno_t nblock = dir->f_size / BLKSIZE;
+    for (blockno_t i = 0; i < nblock; i++) {
+        int res = file_get_block(dir, i, &blk);
+        if (res < 0) return res;
+
+        struct File *f = (struct File *)blk;
+        for (blockno_t j = 0; j < BLKFILES; j++) {
+            if (f[j].f_name[0] == '\0') {
+                return result;
+            }
+            result++;
+        }
+    }
+	return result;
+}
+
 /* Skip over slashes. */
 static const char *
 skip_slash(const char *p) {
@@ -448,6 +469,87 @@ file_set_size(struct File *f, off_t newsize) {
     f->f_size = newsize;
     flush_block(f);
     return 0;
+}
+
+int
+file_set_perm(struct File *f, uint8_t perm) {
+    f->f_perm = perm;
+    flush_block(f);
+    return 0;
+}
+
+static int 
+dir_remove_file(struct File *dir, struct File *f) {
+	char *blk;
+	struct File *tmp = NULL;
+	struct File *next_tmp;
+	blockno_t last;
+	
+	int files_in_dir = 0;
+	int num_struct = 0, num_block = 0, num_files = 0;
+	assert((dir->f_size % BLKSIZE) == 0);
+	
+	files_in_dir = dir_num_file(dir);
+	blockno_t nblock = dir->f_size / BLKSIZE;
+	
+	for (blockno_t i = 0; i < nblock; i++) {
+		int res = file_get_block(dir, i, &blk);
+		if (res < 0) return res;
+
+		tmp = (struct File*) blk;
+		for (blockno_t j = 0; j < BLKFILES; j++) {
+			last = j;
+			if (!strcmp(tmp[j].f_name, f->f_name)) {
+				num_files = (BLKFILES - (j + 1)) + (nblock - (i + 1)) * BLKFILES;
+				num_struct = j + 1;
+				num_block = i + 1;
+				memset(&tmp[j], 0, sizeof(struct File));
+				if (i == nblock - 1) {
+					if ((j == 0) && (tmp[j+1].f_name[0] == '\0')) {
+						file_truncate_blocks(dir, (nblock - 1) * BLKSIZE);
+						dir->f_size -= BLKSIZE;
+						return 0;
+					} else if (j == BLKFILES - 1 || tmp[j+1].f_name[0] == '\0') {
+						return 0;
+					} else {
+						memmove(&tmp[j], &tmp[j+1], sizeof(struct File) * (BLKFILES - (j + 2)));
+						return 0;
+					}
+				} else goto move;
+			}
+		}
+	}
+move:
+	for(blockno_t i = num_block; i < nblock; i++) {
+		if (num_struct != BLKFILES) {
+			memmove(&tmp[last], &tmp[last+1], sizeof(struct File) * (BLKFILES - num_struct));
+			num_struct = BLKFILES;
+		}
+		int res = file_get_block(dir, i, &blk);
+		if (res < 0) return res;
+		
+		next_tmp = (struct File*) blk;
+		memmove(&tmp[BLKFILES - 1], &next_tmp[0], sizeof(struct File));
+		memmove(&next_tmp[0], &next_tmp[1], sizeof(struct File) * (BLKFILES - 1));
+		tmp = next_tmp;
+	}
+	if (((files_in_dir - 1) % BLKFILES) == 0) {
+		file_truncate_blocks(dir, (nblock - 1) * BLKSIZE);
+		dir->f_size -= BLKSIZE;
+	}
+	return 0;
+}
+
+int 
+file_remove(const char *path)  {
+	struct File *f, *dir;
+	int res = walk_path(path, &dir, &f, 0);
+	if (res < 0) {
+		return res;
+	}
+	file_set_size(f, 0);
+	dir_remove_file(dir, f);
+	return 0;
 }
 
 /* Flush the contents and metadata of file f out to disk.

@@ -131,7 +131,12 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             return res;
         }
     }
-    
+	if (req->req_omode & O_CHMOD) {
+        if ((res = file_set_perm(f, req->req_omode & 0x7)) < 0) {
+            if (debug) cprintf("file_set_perm failed: %i", res);
+            return res;
+        }
+    }
     /* Truncate */
     if (req->req_omode & O_TRUNC) {
         if ((res = file_set_size(f, 0)) < 0) {
@@ -219,6 +224,12 @@ serve_read(envid_t envid, union Fsipc *ipc) {
     return read;
 }
 
+int 
+serve_remove(envid_t envid, union Fsipc *ipc) {
+	struct Fsreq_remove *req = &ipc->remove;
+	return file_remove(req->req_path);
+}
+
 /* Write req->req_n bytes from req->req_buf to req_fileid, starting at
  * the current seek position, and update the seek position
  * accordingly.  Extend the file if necessary.  Returns the number of
@@ -294,6 +305,7 @@ fshandler handlers[] = {
         [FSREQ_FLUSH] = serve_flush,
         [FSREQ_WRITE] = serve_write,
         [FSREQ_SET_SIZE] = serve_set_size,
+        [FSREQ_REMOVE] = serve_remove,
         [FSREQ_SYNC] = serve_sync};
 #define NHANDLERS (sizeof(handlers) / sizeof(handlers[0]))
 

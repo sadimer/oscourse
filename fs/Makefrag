@@ -15,6 +15,7 @@ FSIMGTXTFILES :=	fs/newmotd \
 			fs/testshell.sh
 
 USERAPPS :=		$(OBJDIR)/user/init \
+			$(OBJDIR)/user/rm \
 			$(OBJDIR)/user/cat \
 			$(OBJDIR)/user/echo \
 			$(OBJDIR)/user/ls \
