@@ -461,12 +461,11 @@ page_fault_handler(struct Trapframe *tf) {
     static_assert(UTRAP_RSP == offsetof(struct UTrapframe, utf_rsp), "UTRAP_RSP should be equal to RSP offset");
 	
 	uintptr_t fault_va = cr2;
-    //cprintf("[%09x] ENTER %p \n", curenv->env_id, curenv->env_pgfault_upcall);
+    /*cprintf("[%09x] ENTER %p \n", curenv->env_id, curenv->env_pgfault_upcall); */
     if (curenv->env_pgfault_upcall == NULL) {
         cprintf("[%09x] user fault va: %08lx ip %08lx\n", curenv->env_id, fault_va, tf->tf_rip);
 		goto ret;
     }
-
     /* Force allocation of exception stack page to prevent memcpy from
      * causing pagefault during another pagefault */
     // LAB 9: Your code here:

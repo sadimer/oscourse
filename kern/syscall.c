@@ -399,12 +399,12 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf) {
     }
     user_mem_assert(env, tf, sizeof(struct Trapframe), PROT_USER_ | PROT_R);
     nosan_memcpy((void*)&env->env_tf, (void*)tf, sizeof(struct Trapframe));
-    env->env_tf.tf_cs = GD_UT | 3;
-    env->env_tf.tf_ds = GD_UD | 3;
-    env->env_tf.tf_es = GD_UD | 3;
-    env->env_tf.tf_ss = GD_UD | 3;
-    env->env_tf.tf_rflags &= 0xFFF;
+    env->env_tf.tf_cs |= 3;
+    env->env_tf.tf_ds |= 3;
+    env->env_tf.tf_es |= 3;
+    env->env_tf.tf_ss |= 3;
     env->env_tf.tf_rflags |= FL_IF;
+    env->env_tf.tf_rflags &= ~FL_IOPL_3;
     return 0;
 }
 

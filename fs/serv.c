@@ -7,7 +7,7 @@
 #include <inc/string.h>
 
 #include "fs.h"
-
+#define BUFSIZE (PAGE_SIZE - sizeof(int) - sizeof(size_t))
 /* The file system server maintains three structures
  * for each open file.
  *
@@ -201,6 +201,9 @@ serve_read(envid_t envid, union Fsipc *ipc) {
     if (res < 0) {
 		return res;
 	}
+    if (req->req_n > BUFSIZE) {
+        req->req_n = BUFSIZE;
+    }
     ssize_t read = file_read(o->o_file, ipc->readRet.ret_buf, req->req_n, o->o_fd->fd_offset);
     if (read < 0) {
 		return read;
