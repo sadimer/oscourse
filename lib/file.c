@@ -231,7 +231,7 @@ chmod(const char *path, int perm) {
 	} else {
 		strcat(cur_path, path);
 	}
-	int res = open(cur_path, O_CHMOD | perm);
+	int res = open(cur_path, O_CHMOD | (perm << 0x4));
 	if (res < 0) {
 		return res;
 	}

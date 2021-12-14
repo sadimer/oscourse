@@ -13,7 +13,7 @@ int get_lastdir(const char *path) {
 }
 void umain(int argc, char **argv) {
     if (argc != 2) {
-        printf("Usage: cd <directory name>\n");
+        printf("usage: cd [directory name]\n");
         return;
     }
     char path[MAXPATH];
@@ -26,7 +26,7 @@ void umain(int argc, char **argv) {
 				strcat(path, (const char *)&argv[1][2]);
 				strcat(path, "/\0");
 			} else {
-				printf("Error! Path without '/'!\n");
+				printf("error! Path without '/'!\n");
 			}
 		}
 	} else if (argv[1][0] == '.' && argv[1][1] == '.') {
@@ -38,7 +38,7 @@ void umain(int argc, char **argv) {
 				strcat(path, (const char *)&argv[1][3]);
 				strcat(path, "/\0");
 			} else {
-				printf("Error! Path without '/'!\n");
+				printf("error! Path without '/'!\n");
 			}
 		} else {
 			strcat(path, "\0");
@@ -53,6 +53,6 @@ void umain(int argc, char **argv) {
 	}
 	int res = chdir(path);
 	if (res < 0) {
-		printf("Error on chdir of %s: %d\n", argv[0], res);
+		printf("error on chdir of %s: %d\n", argv[0], res);
 	}
 }

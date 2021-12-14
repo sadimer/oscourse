@@ -138,8 +138,23 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             return res;
         }
     }
+    if (!(req->req_omode & O_SPAWN)) {
+		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
+			cprintf("you have not permissions to read this file\n");
+			return -E_INVAL;
+		}
+	} else {
+		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_EXEC) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
+			cprintf("you have not permissions to execute this file\n");
+			return -E_INVAL;
+		}
+	}
+	if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_WRITE) && ((req->req_omode & O_ACCMODE) == O_WRONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
+		cprintf("you have not permissions to write to this file\n");
+		return -E_INVAL;
+	}
 	if (req->req_omode & O_CHMOD) {
-        if ((res = file_set_perm(f, req->req_omode & 0x7)) < 0) {
+        if ((res = file_set_perm(f, (req->req_omode & 0x70) >> 0x4)) < 0) {
             if (debug) cprintf("file_set_perm failed: %i", res);
             return res;
         }

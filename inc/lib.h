@@ -178,8 +178,9 @@ int mkdir(const char *dirname);
 #define O_MKDIR 0x0800 /* create directory, not regular file */
 #define O_CHMOD 0x1000 /* change file permissions */
 #define O_MKLINK 0x2000 /* create symlink */
-#define O_SYSTEM 0x4000
-
+#define O_SYSTEM 0x4000 /* for read/write information to symlinks */
+#define O_SPAWN 0x8000 /* for opening for execution */
+ 
 #ifdef JOS_PROG
 extern void (*volatile sys_exit)(void);
 extern void (*volatile sys_yield)(void);

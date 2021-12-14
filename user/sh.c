@@ -51,7 +51,7 @@ again:
             // LAB 11: Your code here
             fd = open(t, O_RDONLY);
             if (fd < 0) {
-				cprintf("open %s for read %i", t, fd);
+				cprintf("open %s for read %i\n", t, fd);
 				exit();
 			} else if (fd != 0) {
                 dup(fd, 0);
@@ -66,7 +66,7 @@ again:
                 exit();
             }
             if ((fd = open(t, O_WRONLY | O_CREAT | O_TRUNC)) < 0) {
-                cprintf("open %s for write: %i", t, fd);
+                cprintf("open %s for write: %i\n", t, fd);
                 exit();
             }
             if (fd != 1) {
@@ -77,7 +77,7 @@ again:
 
         case '|': /* Pipe */
             if ((r = pipe(p)) < 0) {
-                cprintf("pipe: %i", r);
+                cprintf("pipe: %i\n", r);
                 exit();
             }
             if (debug) cprintf("PIPE: %d %d\n", p[0], p[1]);
@@ -101,7 +101,7 @@ again:
                 close(p[0]);
                 goto runit;
             }
-            panic("| not implemented");
+            panic("| not implemented\n");
             break;
 
         case 0: /* String is complete */
@@ -109,7 +109,7 @@ again:
             goto runit;
 
         default:
-            panic("bad return %d from gettoken", c);
+            panic("bad return %d from gettoken\n", c);
             break;
         }
     }
