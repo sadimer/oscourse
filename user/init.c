@@ -43,11 +43,14 @@ umain(int argc, char **argv) {
         strcat(args, "'");
     }
     cprintf("%s\n", args);
-
+	
     cprintf("init: running sh\n");
 
     /* Being run directly from kernel, so no file descriptors open yet */
     close(0);
+    
+    mkdir("/dev");
+    
     if ((r = opencons()) < 0)
         panic("opencons: %i", r);
     if (r != 0)

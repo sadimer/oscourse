@@ -1,14 +1,16 @@
 #include <inc/string.h>
 #include <inc/lib.h>
 
-char *getcwd(char *buffer, int maxlen) {
+char 
+*getcwd(char *buffer, int maxlen) {
 	if (!buffer || maxlen < 0) {
 		return (char *)thisenv->workpath;
 	}
 	return strncpy((char *)buffer, (const char *)thisenv->workpath, maxlen);
 }
 
-int chdir(const char *path) {
+int 
+chdir(const char *path) {
 	struct Stat st;
 	int res = stat(path, &st);
 	if (res < 0) {
@@ -24,7 +26,8 @@ int chdir(const char *path) {
 }
 
 
-int mkdir(const char *dirname) {
+int 
+mkdir(const char *dirname) {
 	char cur_path[MAXPATH];
 	if (dirname[0] != '/') {
 		getcwd(cur_path, MAXPATH);
