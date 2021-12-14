@@ -54,6 +54,7 @@ struct File {
 /* File types */
 #define FTYPE_REG 0 /* Regular file */
 #define FTYPE_DIR 1 /* Directory */
+#define FTYPE_LINK 2 /* Symlink */
 
 #define PERM_READ 4
 #define PERM_WRITE 2
@@ -111,6 +112,7 @@ union Fsipc {
         char ret_name[MAXNAMELEN];
         off_t ret_size;
         int ret_isdir;
+        int ret_issym;
         uint8_t ret_perm;
     } statRet;
     struct Fsreq_flush {

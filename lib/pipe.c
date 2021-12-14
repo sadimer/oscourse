@@ -154,6 +154,7 @@ devpipe_stat(struct Fd *fd, struct Stat *stat) {
     strcpy(stat->st_name, "<pipe>");
     stat->st_size = p->p_wpos - p->p_rpos;
     stat->st_isdir = 0;
+    stat->st_issym = 0;
     stat->st_perm = 0;
     stat->st_dev = &devpipe;
     return 0;

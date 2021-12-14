@@ -124,6 +124,13 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             if (debug) cprintf("dir_create failed: %i", res);
             return res;
         }
+    } else if (req->req_omode & O_MKLINK) {
+        if ((res = link_create(path, &f)) < 0) {
+            if (!(req->req_omode & O_EXCL) && res == -E_FILE_EXISTS)
+                goto try_open;
+            if (debug) cprintf("dir_create failed: %i", res);
+            return res;
+        }
     } else {
     try_open:
         if ((res = file_open(path, &f)) < 0) {
@@ -149,6 +156,14 @@ serve_open(envid_t envid, struct Fsreq_open *req,
         return res;
     }
 
+	if (f->f_type == FTYPE_LINK && !(req->req_omode & O_SYSTEM)) {
+		char cur_path[MAXPATH];
+		file_read(f, cur_path, sizeof(cur_path), 0);
+		if ((res = file_open(cur_path, &f)) < 0) {
+			if (debug) cprintf("file_open failed: %i", res);
+			return res;
+		}
+	}
     /* Save the file pointer */
     o->o_file = f;
 
@@ -272,6 +287,7 @@ serve_stat(envid_t envid, union Fsipc *ipc) {
     ret->ret_size = o->o_file->f_size;
     ret->ret_perm = o->o_file->f_perm;
     ret->ret_isdir = (o->o_file->f_type == FTYPE_DIR);
+    ret->ret_issym = (o->o_file->f_type == FTYPE_LINK);
     return 0;
 }
 

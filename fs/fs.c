@@ -279,8 +279,6 @@ walk_path(const char *path, struct File **pdir, struct File **pf, char *lastelem
     struct File *dir, *f;
     int r;
 
-    //if (*path != '/')
-    //    return -E_BAD_PATH;
     path = skip_slash(path);
     f = &super->s_root;
     dir = 0;
@@ -345,6 +343,23 @@ file_create(const char *path, struct File **pf) {
     return 0;
 }
 
+int
+link_create(const char *path, struct File **pf) {
+    char name[MAXNAMELEN];
+    int res;
+    struct File *dir, *filp;
+
+    if (!(res = walk_path(path, &dir, &filp, name))) return -E_FILE_EXISTS;
+    if (res != -E_NOT_FOUND || dir == 0) return res;
+    if ((res = dir_alloc_file(dir, &filp)) < 0) return res;
+
+    strcpy(filp->f_name, name);
+    filp->f_type = FTYPE_LINK;
+    filp->f_perm = PERM_READ | PERM_WRITE | PERM_EXEC;
+    *pf = filp;
+    file_flush(dir);
+    return 0;
+}
 
 int
 dir_create(const char *path, struct File **pf) {

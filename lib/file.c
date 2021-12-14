@@ -198,6 +198,8 @@ devfile_stat(struct Fd *fd, struct Stat *st) {
     strcpy(st->st_name, fsipcbuf.statRet.ret_name);
     st->st_size = fsipcbuf.statRet.ret_size;
     st->st_isdir = fsipcbuf.statRet.ret_isdir;
+    st->st_perm = fsipcbuf.statRet.ret_perm;
+    st->st_issym = fsipcbuf.statRet.ret_issym;
 
     return 0;
 }
@@ -251,5 +253,33 @@ remove(const char *path) {
 	if (res < 0) {
 		return res;
 	}
+	return 0;
+}
+
+int 
+symlink(const char *symlink_path, const char *path) {
+	char cur_path[MAXPATH];
+	if (path[0] != '/') {
+		getcwd(cur_path, MAXPATH);
+		strcat(cur_path, path);
+	} else {
+		strcat(cur_path, path);
+	}
+	char symlink_cur_path[MAXPATH];
+	if (symlink_path[0] != '/') {
+		getcwd(symlink_cur_path, MAXPATH);
+		strcat(symlink_cur_path, symlink_path);
+	} else {
+		strcat(symlink_cur_path, symlink_path);
+	}
+	int fd = open(symlink_cur_path, O_MKLINK | O_WRONLY | O_SYSTEM | O_EXCL);
+	if (fd < 0) {
+		return fd;
+	}
+	int res = write(fd, cur_path, sizeof(cur_path));
+	if (res != sizeof(cur_path)) {
+		return res;
+	}
+	close(fd);
 	return 0;
 }
