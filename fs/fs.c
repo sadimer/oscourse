@@ -1,6 +1,7 @@
 #include <inc/string.h>
 #include <inc/partition.h>
 
+
 #include "fs.h"
 
 /* Superblock */
@@ -557,10 +558,28 @@ move:
 
 int 
 file_remove(const char *path)  {
+	char *blk;
 	struct File *f, *dir;
+	struct File *tmp = NULL;
 	int res = walk_path(path, &dir, &f, 0);
 	if (res < 0) {
 		return res;
+	}
+	if (f->f_type == FTYPE_DIR) {
+		blockno_t nblock = f->f_size / BLKSIZE;
+		for (blockno_t i = 0; i < nblock; i++) {
+			int res = file_get_block(f, i, &blk);
+			if (res < 0) return res;
+
+			tmp = (struct File*) blk;
+			for (blockno_t j = 0; j < BLKFILES; j++) {
+				if (tmp[j].f_name[0]) {
+					cprintf("remove %s/%s with removing a directory\n", path, tmp[j].f_name);
+					file_set_size(&tmp[j], 0);
+					dir_remove_file(f, &tmp[j]);
+				}
+			}
+		}
 	}
 	file_set_size(f, 0);
 	dir_remove_file(dir, f);
