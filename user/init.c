@@ -49,14 +49,24 @@ umain(int argc, char **argv) {
     /* Being run directly from kernel, so no file descriptors open yet */
     close(0);
     
-    mkdir("/dev");
-    
     if ((r = opencons()) < 0)
         panic("opencons: %i", r);
     if (r != 0)
         panic("first opencons used fd %d", r);
     if ((r = dup(0, 1)) < 0)
         panic("dup: %i", r);
+    if ((r = dup(0, 2)) < 0)
+        panic("dup: %i", r);
+       
+    if ((r = mkdir("/dev") < 0))
+		panic("cant make /dev\n");
+	if ((r = open("/dev/stdin", O_CREAT) < 0)) 
+		panic("cant make stdin\n");
+	if ((r = open("/dev/stdout", O_CREAT) < 0))
+		panic("cant make stout\n");
+	if ((r = open("/dev/stderr", O_CREAT) < 0))
+		panic("cant make stderr\n");
+	
     while (1) {
         cprintf("init: starting sh\n");
         r = spawnl("/sh", "sh", (char *)0);

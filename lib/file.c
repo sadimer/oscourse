@@ -68,10 +68,22 @@ open(const char *path, int mode) {
     int res;
     struct Fd *fd;
 
-    if (strlen(path) >= MAXPATHLEN)
+    if (strlen(path) >= MAXPATHLEN) {
         return -E_BAD_PATH;
+	}
 
-
+	if (!strcmp(path, "/dev/stdin") && mode != O_CREAT && ((mode & O_SPAWN) != O_SPAWN)) {
+		return 0;
+	}
+	
+	if (!strcmp(path, "/dev/stdout") && mode != O_CREAT && ((mode & O_SPAWN) != O_SPAWN)) {
+		return 1;
+	}
+	
+	if (!strcmp(path, "/dev/stderr") && mode != O_CREAT && ((mode & O_SPAWN) != O_SPAWN)) {
+		return 2;
+	}
+		
     if ((res = fd_alloc(&fd)) < 0) return res;
 
 

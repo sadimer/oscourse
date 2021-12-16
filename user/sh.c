@@ -250,7 +250,7 @@ void
 umain(int argc, char **argv) {
     int r, interactive, echocmds;
     struct Argstate args;
-
+	
     interactive = '?';
     echocmds = 0;
     argstart(&argc, argv, &args);
@@ -277,9 +277,10 @@ umain(int argc, char **argv) {
             panic("open %s: %i", argv[1], r);
         assert(r == 0);
     }
-    if (interactive == '?')
+    if (interactive == '?') {
         interactive = iscons(0);
-
+	}
+	          
     while (1) {
         char *buf;
 
