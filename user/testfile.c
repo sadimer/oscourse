@@ -123,4 +123,23 @@ umain(int argc, char **argv) {
     }
     close(f);
     cprintf("large file is good\n");
-}
+    
+    /* Simple test - create dir, check that we can't exec, read and write to dir, add file to dir, 
+       read and write to this file, remove dir, and check removing file */
+    
+    if ((f = mkdir("/dir")) < 0)  {
+		panic("creat /dir: %ld", (long)f);
+	}
+	if ((f = open("/dir/file", O_RDWR | O_CREAT)) < 0) {
+        panic("open /dir/file: %ld", (long)f);
+	}
+	memset(buf, 0, sizeof(buf));
+	if ((r = write(f, buf, sizeof(buf))) < 0) {
+		panic("write /dir/file %ld", (long)r);
+	}
+	if ((r = read(f, buf, sizeof(buf))) < 0) {
+		panic("read /dir/file %ld", (long)r);
+	}
+	close(f);
+    cprintf("dir simple test is good\n");
+}	

@@ -71,19 +71,7 @@ open(const char *path, int mode) {
     if (strlen(path) >= MAXPATHLEN) {
         return -E_BAD_PATH;
 	}
-
-	if (!strcmp(path, "/dev/stdin") && mode != O_CREAT && ((mode & O_SPAWN) != O_SPAWN)) {
-		return 0;
-	}
 	
-	if (!strcmp(path, "/dev/stdout") && mode != O_CREAT && ((mode & O_SPAWN) != O_SPAWN)) {
-		return 1;
-	}
-	
-	if (!strcmp(path, "/dev/stderr") && mode != O_CREAT && ((mode & O_SPAWN) != O_SPAWN)) {
-		return 2;
-	}
-		
     if ((res = fd_alloc(&fd)) < 0) return res;
 
 
@@ -94,6 +82,17 @@ open(const char *path, int mode) {
         fd_close(fd, 0);
         return res;
     }
+    
+    if (!strcmp(path, "/dev/stdin")) {
+		fd_close(fd, 0);
+		return 0;
+	} else if (!strcmp(path, "/dev/stdout")) {
+		fd_close(fd, 0);
+		return 1;
+	} else if (!strcmp(path, "/dev/stderr")) {
+		fd_close(fd, 0);
+		return 2;
+	}
 
     return fd2num(fd);
 }
