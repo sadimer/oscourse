@@ -252,7 +252,7 @@ chmod(const char *path, int perm) {
 
 int
 remove(const char *path) {
-	char cur_path[MAXPATH];
+	char cur_path[MAXPATH] = {0};
 	if (path[0] != '/') {
 		getcwd(cur_path, MAXPATH);
 		strcat(cur_path, path);
@@ -269,7 +269,7 @@ remove(const char *path) {
 
 int 
 symlink(const char *symlink_path, const char *path) {
-	char cur_path[MAXPATH];
+	char cur_path[MAXPATH] = {0};
 	if (path[0] != '/') {
 		getcwd(cur_path, MAXPATH);
 		strcat(cur_path, path);

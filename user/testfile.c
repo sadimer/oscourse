@@ -126,10 +126,23 @@ umain(int argc, char **argv) {
     
     /* Simple test - create dir, check that we can't exec, read and write to dir, add file to dir, 
        read and write to this file, remove dir, and check removing file */
-    
+    cprintf("creating /dir\n");
     if ((f = mkdir("/dir")) < 0)  {
 		panic("creat /dir: %ld", (long)f);
 	}
+	if ((f = open("/dir", O_RDWR)) >= 0) {
+		close(f);
+        panic("open /dir on write: %ld", (long)f);
+	}
+	if ((f = open("/dir", O_WRONLY)) >= 0) {
+		close(f);
+        panic("open /dir on write: %ld", (long)f);
+	}
+	if ((f = open("/dir", O_RDONLY | O_SPAWN)) >= 0) {
+		close(f);
+        panic("open /dir to exec: %ld", (long)f);
+	}
+	cprintf("creating /dir is good\n");
 	if ((f = open("/dir/file", O_RDWR | O_CREAT)) < 0) {
         panic("open /dir/file: %ld", (long)f);
 	}
@@ -141,5 +154,23 @@ umain(int argc, char **argv) {
 		panic("read /dir/file %ld", (long)r);
 	}
 	close(f);
+	cprintf("operations with files in /dir is good\n");
+	char path[1000];
+	getcwd(path, 1000);
+	cprintf("removing /dir\n");
+	if ((f = remove("/dir")) < 0)  {
+		panic("remove /dir: %ld", (long)f);
+	}
+	if ((f = open("/dir", O_RDONLY) >= 0)) {
+		close(f);
+        panic("open removed /dir: %ld", (long)f);
+	}
+	close(f);
+	if ((f = open("/dir/file", O_RDONLY) >= 0)) {
+		close(f);
+        panic("open removed /dir/file: %ld", (long)f);
+	}
+	close(f);
+	cprintf("removing /dir is good\n");
     cprintf("dir simple test is good\n");
 }	

@@ -138,6 +138,20 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             return res;
         }
     }
+    if (f->f_type == FTYPE_DIR && !(req->req_omode & O_SYSTEM)) {
+		if ((req->req_omode & O_ACCMODE) == O_RDONLY && req->req_omode & O_SPAWN) {
+			cprintf("you cant exec directory\n");
+			return -E_INVAL;
+		}
+		if ((req->req_omode & O_ACCMODE) == O_WRONLY) {
+			cprintf("you cant write to directory\n");
+			return -E_INVAL;
+		}
+		if ((req->req_omode & O_ACCMODE) == O_RDWR) {
+			cprintf("you cant read/write from directory\n");
+			return -E_INVAL;
+		}
+	}
     if (!(req->req_omode & O_SPAWN)) {
 		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
 			cprintf("you have not permissions to read this file\n");

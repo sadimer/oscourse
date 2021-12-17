@@ -168,9 +168,6 @@ file_block_walk(struct File *f, blockno_t filebno, blockno_t **ppdiskbno, bool a
 int
 file_get_block(struct File *f, uint32_t filebno, char **blk) {
     // LAB 10: Your code here
-    //if (filebno >= NDIRECT + NINDIRECT) {
-    //    return -E_INVAL;
-    //}
     uint32_t *pdiskbno;
     file_block_walk(f, filebno, &pdiskbno, 1);
     if (!*pdiskbno) {
