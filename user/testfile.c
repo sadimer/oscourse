@@ -229,7 +229,7 @@ umain(int argc, char **argv) {
         panic("remove /file: %ld", (long)f);
     }
     if ((f = open("/copy", O_RDONLY)) != -15) {
-        panic("remove /copy: %ld", (long) f);
+        panic("open /copy: %ld", (long) f);
     }
     if ((f = remove("/copy")) < 0)  {
         panic("remove /copy: %ld", (long)f);
