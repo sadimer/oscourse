@@ -234,7 +234,7 @@ umain(int argc, char **argv) {
     if ((f = remove("/file")) < 0)  {
         panic("remove /copy: %ld", (long)f);
     }
-    cprintf("open not existed file from symlink  /copy is failed\n");
+    cprintf("open not existed file from symlink /copy is failed\n");
 
     cprintf("symlink test is good\n");
 
