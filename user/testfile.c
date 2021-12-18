@@ -226,12 +226,12 @@ umain(int argc, char **argv) {
 
     cprintf("Situation when source file is deleted\n");
     if ((f = remove("/file")) < 0)  {
-        panic("remove /copy: %ld", (long)f);
+        panic("remove /file: %ld", (long)f);
     }
     if ((f = open("/copy", O_RDONLY)) != -15) {
-        panic("open /copy: %ld", (long) f);
+        panic("remove /copy: %ld", (long) f);
     }
-    if ((f = remove("/file")) < 0)  {
+    if ((f = remove("/copy")) < 0)  {
         panic("remove /copy: %ld", (long)f);
     }
     cprintf("open not existed file from symlink  /copy is failed\n");
@@ -243,22 +243,48 @@ umain(int argc, char **argv) {
      * with descriptor number 1. Compare it with write text before.
      *
      */
-    if ((f = open("/dev/stdout", O_WRONLY)) < 0) {
-        panic("open /dev/stdout: %ld", (long)f);
-    }
-    if ((r = write(f, buf2, sizeof(buf))) < 0) {
-        panic("write /dev/stdout %ld", (long)r);
-    }
-    if ((r = read(1, buf2_copy, sizeof(buf))) < 0) {
-        panic("read 1 %ld", (long)r);
-    }
-    if (strcmp(buf2_copy,buf2)){
-        panic("file is different");
-    }
-    close(f);
-    cprintf("operations with files in /. is good\n");
 
+//    if ((f = open("/dev/stdout", O_WRONLY)) < 0) {
+//        panic("open /dev/stdout: %ld", (long)f);
+//    }
+//    if ((r = write(f, buf2, sizeof(buf))) < 0) {
+//        panic("write /dev/stdout %ld", (long)r);
+//    }
+//    if ((r = read(1, buf2_copy, sizeof(buf))) < 0) {
+//        panic("read 1 %ld", (long)r);
+//    }
+//    if (strcmp(buf2_copy,buf2)){
+//        panic("file is different");
+//    }
+//    close(f);
+//    cprintf("operations with files in /. is good\n");
 
+    /* Create file. Call cmod on this file. Call stat and checkout st_perm.
+     * Is it correct??
+     */
+    if ((f = open("/file", O_RDWR | O_CREAT)) < 0) {
+        panic("open /file: %ld", (long)f);
+    }
+    if ((r = chmod("file",0)) < 0){
+        panic("open /file: %ld", (long)f);
+    }
 
+    if ((f = open("/file", O_RDWR)) >= 0) {
+        close(f);
+        panic("open /file on write: %ld", (long)f);
+    }
+    if ((f = open("/file", O_WRONLY)) >= 0) {
+        close(f);
+        panic("open /file on write: %ld", (long)f);
+    }
+    if ((f = open("/file", O_RDONLY | O_SPAWN)) >= 0) {
+        close(f);
+        panic("open /file to exec: %ld", (long)f);
+    }
+
+    if ((f = remove("/file")) < 0)  {
+        panic("remove /file: %ld", (long)f);
+    }
+    cprintf("chmod test is good\n");
 
 }
