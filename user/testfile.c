@@ -124,26 +124,42 @@ umain(int argc, char **argv) {
     close(f);
     cprintf("large file is good\n");
     
-    /* Simple test - create dir, check that we can't exec, read and write to dir, add file to dir, 
-       read and write to this file, remove dir, and check removing file */
+    
+    if ((f = remove("/big")) < 0)  {
+        panic("remove /file: %ld", (long)f);
+    }
+    
+    if ((f = remove("/new-file")) < 0)  {
+        panic("remove /new-file: %ld", (long)f);
+    }
+    
+    char dir[32] = "/dir";
+	char file[32] = "/file";
+	char copy[32] = "/copy";
+	char src[32] = "/";
+	char dir_file[32] = "/dir/file";
+	
+    /* Simple test - create dir, check that we can't exec, read and write to dir. Add file to dir.
+       Read and write to this file, remove dir, and check removing file. */
+       
     cprintf("creating /dir\n");
-    if ((f = mkdir("/dir")) < 0)  {
+    if ((f = mkdir(dir)) < 0)  {
 		panic("creat /dir: %ld", (long)f);
 	}
-	if ((f = open("/dir", O_RDWR)) >= 0) {
+	if ((f = open(dir, O_RDWR)) >= 0) {
 		close(f);
         panic("open /dir on write: %ld", (long)f);
 	}
-	if ((f = open("/dir", O_WRONLY)) >= 0) {
+	if ((f = open(dir, O_WRONLY)) >= 0) {
 		close(f);
         panic("open /dir on write: %ld", (long)f);
 	}
-	if ((f = open("/dir", O_RDONLY | O_SPAWN)) >= 0) {
+	if ((f = open(dir, O_RDONLY | O_SPAWN)) >= 0) {
 		close(f);
         panic("open /dir to exec: %ld", (long)f);
 	}
 	cprintf("creating /dir is good\n");
-	if ((f = open("/dir/file", O_RDWR | O_CREAT)) < 0) {
+	if ((f = open(dir_file, O_RDWR | O_CREAT)) < 0) {
         panic("open /dir/file: %ld", (long)f);
 	}
 	memset(buf, 0, sizeof(buf));
@@ -155,16 +171,32 @@ umain(int argc, char **argv) {
 	}
 	close(f);
 	cprintf("operations with files in /dir is good\n");
+	
+	/* Simple test - change dir. Check pwd. */
+	cprintf("change directory check\n");
+	if ((r = chdir(dir)) < 0) {
+        panic("cd /dir %ld", (long)r);
+    }
+    memset(buf, 0, sizeof(buf));
+    getcwd(buf, 512);
+    if (strcmp(buf, dir)) {
+        panic("fail to get pwd of /dir %ld", (long)r);
+    }
+    if ((r = chdir(src)) < 0) {
+        panic("cd / %ld", (long)r);
+    }
+    cprintf("change directory check is good\n");
+    
 	cprintf("removing /dir\n");
-	if ((f = remove("/dir")) < 0)  {
+	if ((f = remove(dir)) < 0)  {
 		panic("remove /dir: %ld", (long)f);
 	}
-	if ((f = open("/dir", O_RDONLY) >= 0)) {
+	if ((f = open(dir, O_RDONLY) >= 0)) {
 		close(f);
         panic("open removed /dir: %ld", (long)f);
 	}
 	close(f);
-	if ((f = open("/dir/file", O_RDONLY) >= 0)) {
+	if ((f = open(dir_file, O_RDONLY) >= 0)) {
 		close(f);
         panic("open removed /dir/file: %ld", (long)f);
 	}
@@ -172,119 +204,166 @@ umain(int argc, char **argv) {
 	cprintf("removing /dir is good\n");
     cprintf("dir simple test is good\n");
 
-
     /* Simple test - create file, write something into it. Creat
-     * symlink. Read file from symlink. Write something into symlink
-     * Check the source file and compare it.
-     * After that delete source file. And open symlink. */
-    if ((f = open("/file", O_RDWR | O_CREAT)) < 0) {
+       symlink. Read file from symlink. Write something into symlink.
+	   Check the source file and compare it.
+       After that delete source file. And open symlink. */
+       
+    if ((f = open(file, O_WRONLY | O_CREAT)) < 0) {
         panic("open /file: %ld", (long)f);
     }
-    char buf2_copy[32],buf2[32] = "Hello world";
+    char buf2_copy[32], buf2[32] = "Hello world";
     if ((r = write(f, buf2, sizeof(buf))) < 0) {
         panic("write /file %ld", (long)r);
     }
     close(f);
-    cprintf("operations with files in /. is good\n");
-
+    cprintf("operations with files is good\n");
+    
     cprintf("creating symlink\n");
-    if ((f = symlink("/copy","/file")) < 0)  {
+    if ((f = symlink(copy, file)) < 0)  {
         panic("creat symlink /copy: %ld", (long)f);
     }
     cprintf("reading from symlink\n");
-    if ((f = open("/copy", O_RDWR)) < 0) {
+    if ((f = open(copy, O_RDONLY)) < 0) {
         panic("open /copy: %ld", (long)f);
     }
     if ((r = read(f, buf2_copy, sizeof(buf2))) < 0) {
         panic("read /copy %ld", (long) r);
     }
-    if (strcmp(buf2_copy,buf2)){
+    if (strcmp(buf2_copy, buf2)) {
+        panic("file is different\n");
+    }
+    cprintf("read from symlink /copy is good\n");
+    close(f);
+    
+    if ((f = open(copy, O_WRONLY)) < 0) {
+        panic("open /copy: %ld", (long)f);
+    }
+	char buf3_copy[32], buf3[32] = "World Hello";
+    if ((r = write(f, buf3, sizeof(buf3))) < 0) {
+        panic("write /copy %ld", (long) r);
+    }
+    close(f);
+    if ((f = open(file, O_RDONLY)) < 0) {
+        panic("open /file: %ld", (long)f);
+    }
+    if ((r = read(f, buf3_copy, sizeof(buf3_copy))) < 0) {
+        panic("read /file %ld", (long) r);
+    }
+    close(f);
+    if (strcmp(buf3_copy, buf3)){
         panic("file is different");
     }
-    cprintf("read from symlink  /copy is good\n");
+    cprintf("write into symlink /copy is good\n");
 
-//    char buf3_copy[32], buf3[32] = "World Hello"; // Не работает
-//    if ((r = write(f, buf3, sizeof(buf3))) < 0) {
-//        panic("write /copy %ld", (long) r);
-//    }
-    close(f);
-
-
-//    if ((f = open("/file", O_RDONLY)) < 0) {
-//        panic("open /file: %ld", (long)f);
-//    }
-//    if ((r = read(f, buf3_copy, sizeof(buf3_copy))) < 0) {
-//        panic("read /file %ld", (long) r);
-//    }
-//    cprintf("%s\n%s\n",buf3_copy,buf3);
-//    if (strcmp(buf3_copy,buf3)){
-//        cprintf("%s\n%s\n",buf3_copy,buf3);
-//        //panic("file is different");
-//    }
-//    cprintf("write into symlink  /copy is good\n");
-
-
-    cprintf("Situation when source file is deleted\n");
-    if ((f = remove("/file")) < 0)  {
+    cprintf("test situation when source file is deleted\n");
+    if ((f = remove(file)) < 0)  {
         panic("remove /file: %ld", (long)f);
     }
-    if ((f = open("/copy", O_RDONLY)) != -15) {
+    if ((f = open(copy, O_RDONLY)) != -15) {
         panic("open /copy: %ld", (long) f);
     }
-    if ((f = remove("/copy")) < 0)  {
+    if ((f = remove(copy)) < 0)  {
         panic("remove /copy: %ld", (long)f);
     }
     cprintf("open not existed file from symlink /copy is failed\n");
-
     cprintf("symlink test is good\n");
 
-
-    /* Open file dev/stdout. Write something into it. Call read function
-     * with descriptor number 1. Compare it with write text before.
-     *
-     */
-
-//    if ((f = open("/dev/stdout", O_WRONLY)) < 0) {
-//        panic("open /dev/stdout: %ld", (long)f);
-//    }
-//    if ((r = write(f, buf2, sizeof(buf))) < 0) {
-//        panic("write /dev/stdout %ld", (long)r);
-//    }
-//    if ((r = read(1, buf2_copy, sizeof(buf))) < 0) {
-//        panic("read 1 %ld", (long)r);
-//    }
-//    if (strcmp(buf2_copy,buf2)){
-//        panic("file is different");
-//    }
-//    close(f);
-//    cprintf("operations with files in /. is good\n");
-
-    /* Create file. Call cmod on this file. Call stat and checkout st_perm.
-     * Is it correct??
-     */
-    if ((f = open("/file", O_RDWR | O_CREAT)) < 0) {
+    /* Open file dev/stdout, dev/stderr, dev/stdin (with dup). Write something into it. Check results. */
+    
+    char stderr[32] = "/dev/stderr";
+    char stdout[32] = "/dev/stdout";
+    char stdin[32] = "/dev/stdin";
+    
+    char buf7[32] = "stdout available\n";
+    
+    if ((r = write(1, buf7, sizeof(buf7))) >= 0) {
+		char buf4[32] = "stdout is good\n";
+		if ((f = open(stdout, O_WRONLY)) < 0) {
+			panic("open /dev/stdout: %ld", (long)f);
+		}
+		if ((r = write(f, buf4, sizeof(buf4))) < 0) {
+			panic("write /dev/stdout %ld", (long)r);
+		}
+		char buf5[32] = "stderr is good\n";
+		if ((f = open(stderr, O_WRONLY)) < 0) {
+			panic("open /dev/stdout: %ld", (long)f);
+		}
+		if ((r = write(f, buf5, sizeof(buf5))) < 0) {
+			panic("write /dev/stdout %ld", (long)r);
+		}
+		int reserv = 3;
+		dup(0, reserv);
+		dup(1, 0);
+		char buf6[32] = "stdin is good\n";
+		if ((f = open(stdin, O_WRONLY)) < 0) {
+			panic("open /dev/stdin: %ld", (long)f);
+		}
+		if ((r = write(f, buf6, sizeof(buf6))) < 0) {
+			panic("write /dev/stdin %ld", (long)r);
+		}
+		dup(reserv, 0);
+		close(reserv);
+	}
+    
+    /* Create dir and add symlink to dir. Check that we can cd, and cant read/write/exec */
+    cprintf("creating /dir\n");
+    if ((f = mkdir(dir)) < 0)  {
+		panic("creat /dir: %ld", (long)f);
+	}
+	cprintf("creating symlink to /dir\n");
+    if ((f = symlink(copy, dir)) < 0)  {
+        panic("creat symlink /copy: %ld", (long)f);
+    }
+	if ((r = chdir(copy)) < 0) {
+        panic("cd /dir %ld", (long)r);
+    }
+    if ((r = chdir(src)) < 0) {
+        panic("cd / %ld", (long)r);
+    }
+    if ((f = open(copy, O_RDWR)) >= 0) {
+		close(f);
+        panic("open /dir on write: %ld", (long)f);
+	}
+	if ((f = open(copy, O_WRONLY)) >= 0) {
+		close(f);
+        panic("open /dir on write: %ld", (long)f);
+	}
+	if ((f = open(copy, O_RDONLY | O_SPAWN)) >= 0) {
+		close(f);
+        panic("open /dir to exec: %ld", (long)f);
+	}
+    if ((f = remove(copy)) < 0)  {
+        panic("remove /file: %ld", (long)f);
+    }
+    if ((f = remove(dir)) < 0)  {
+        panic("remove /file: %ld", (long)f);
+    }
+    cprintf("change directory by symlink check is good\n");
+    
+    /* Create file. Call chmod on this file. Call stat and checkout st_perm.
+       Is it correct? */
+    if ((f = open(file, O_RDWR | O_CREAT)) < 0) {
         panic("open /file: %ld", (long)f);
     }
-    if ((r = chmod("file",0)) < 0){
-        panic("open /file: %ld", (long)f);
+    if ((r = chmod(file, 0)) < 0) {
+        panic("chmod /file: %ld", (long)r);
     }
-
-    if ((f = open("/file", O_RDWR)) >= 0) {
+    if ((f = open(file, O_RDONLY)) >= 0) {
+        close(f);
+        panic("open /file on read: %ld", (long)f);
+    }
+    if ((f = open(file, O_WRONLY)) >= 0) {
         close(f);
         panic("open /file on write: %ld", (long)f);
     }
-    if ((f = open("/file", O_WRONLY)) >= 0) {
-        close(f);
-        panic("open /file on write: %ld", (long)f);
-    }
-    if ((f = open("/file", O_RDONLY | O_SPAWN)) >= 0) {
+    if ((f = open(file, O_RDONLY | O_SPAWN)) >= 0) {
         close(f);
         panic("open /file to exec: %ld", (long)f);
     }
-
-    if ((f = remove("/file")) < 0)  {
+    if ((f = remove(file)) < 0)  {
         panic("remove /file: %ld", (long)f);
     }
     cprintf("chmod test is good\n");
-
+    cprintf("all tests passed!\n");
 }

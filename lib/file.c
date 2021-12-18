@@ -82,7 +82,6 @@ open(const char *path, int mode) {
         fd_close(fd, 0);
         return res;
     }
-    
     if (!strcmp(path, "/dev/stdin")) {
 		fd_close(fd, 0);
 		return 0;
@@ -122,6 +121,8 @@ devfile_read(struct Fd *fd, void *buf, size_t n) {
    * filling fsipcbuf.read with the request arguments.  The
    * bytes read will be written back to fsipcbuf by the file
    * system server. */
+   
+    // LAB 10: Your code here:
     if (!fd || !buf)
         return E_INVAL;
 
@@ -141,18 +142,6 @@ devfile_read(struct Fd *fd, void *buf, size_t n) {
     }
 
     return res0;
-
-    // LAB 10: Your code here:
-    /*
-	fsipcbuf.read.req_fileid = fd->fd_file.id;
-    fsipcbuf.read.req_n = n;
-    int read = fsipc(FSREQ_READ, NULL);
-    if (read < 0) {
-		return read;
-	}
-    memmove(buf, fsipcbuf.readRet.ret_buf, read);
-    return read;
-    */
 }
 
 /* Write at most 'n' bytes from 'buf' to 'fd' at the current seek position.
@@ -163,9 +152,10 @@ devfile_read(struct Fd *fd, void *buf, size_t n) {
 static ssize_t
 devfile_write(struct Fd *fd, const void *buf, size_t n) {
     /* Make an FSREQ_WRITE request to the file system server.  Be
-   * careful: fsipcbuf.write.req_buf is only so large, but
-   * remember that write is always allowed to write *fewer*
-   * bytes than requested. */
+	* careful: fsipcbuf.write.req_buf is only so large, but
+	* remember that write is always allowed to write *fewer*
+	* bytes than requested. */
+	// LAB 10: Your code here:
     if (!fd || !buf)
         return E_INVAL;
 
@@ -186,17 +176,6 @@ devfile_write(struct Fd *fd, const void *buf, size_t n) {
     }
 
     return res0;
-    // LAB 10: Your code here:
-	/*
-    fsipcbuf.write.req_fileid = fd->fd_file.id;
-    fsipcbuf.write.req_n = n;
-    memmove(fsipcbuf.write.req_buf, buf, MIN(sizeof(fsipcbuf.write.req_buf), n));
-    int write= fsipc(FSREQ_WRITE, NULL);
-    if (write < 0) {
-		return write;
-	}
-    return write;
-    */
 }
 
 /* Get file information */
@@ -235,7 +214,7 @@ sync(void) {
 
 int
 chmod(const char *path, int perm) {
-	char cur_path[MAXPATH];
+	char cur_path[MAXPATH] = {0};
 	if (path[0] != '/') {
 		getcwd(cur_path, MAXPATH);
 		strcat(cur_path, path);
@@ -276,7 +255,7 @@ symlink(const char *symlink_path, const char *path) {
 	} else {
 		strcat(cur_path, path);
 	}
-	char symlink_cur_path[MAXPATH];
+	char symlink_cur_path[MAXPATH] = {0};
 	if (symlink_path[0] != '/') {
 		getcwd(symlink_cur_path, MAXPATH);
 		strcat(symlink_cur_path, symlink_path);

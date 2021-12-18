@@ -138,20 +138,6 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             return res;
         }
     }
-    if (f->f_type == FTYPE_DIR && !(req->req_omode & O_SYSTEM)) {
-		if ((req->req_omode & O_ACCMODE) == O_RDONLY && req->req_omode & O_SPAWN) {
-			cprintf("you cant exec directory\n");
-			return -E_INVAL;
-		}
-		if ((req->req_omode & O_ACCMODE) == O_WRONLY) {
-			cprintf("you cant write to directory\n");
-			return -E_INVAL;
-		}
-		if ((req->req_omode & O_ACCMODE) == O_RDWR) {
-			cprintf("you cant read/write from directory\n");
-			return -E_INVAL;
-		}
-	}
     if (!(req->req_omode & O_SPAWN)) {
 		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
 			cprintf("you have not permissions to read this file\n");
@@ -186,13 +172,29 @@ serve_open(envid_t envid, struct Fsreq_open *req,
     }
 
 	if (f->f_type == FTYPE_LINK && !(req->req_omode & O_SYSTEM)) {
-		char cur_path[MAXPATH];
+		char cur_path[MAXPATH] = {0};
 		file_read(f, cur_path, sizeof(cur_path), 0);
 		if ((res = file_open(cur_path, &f)) < 0) {
 			if (debug) cprintf("file_open failed: %i", res);
 			return res;
 		}
 	}
+	
+	if (f->f_type == FTYPE_DIR && !(req->req_omode & O_SYSTEM)) {
+		if ((req->req_omode & O_ACCMODE) == O_RDONLY && req->req_omode & O_SPAWN) {
+			cprintf("you cant exec directory\n");
+			return -E_INVAL;
+		}
+		if ((req->req_omode & O_ACCMODE) == O_WRONLY) {
+			cprintf("you cant write to directory\n");
+			return -E_INVAL;
+		}
+		if ((req->req_omode & O_ACCMODE) == O_RDWR) {
+			cprintf("you cant read/write from directory\n");
+			return -E_INVAL;
+		}
+	}
+	
     /* Save the file pointer */
     o->o_file = f;
 

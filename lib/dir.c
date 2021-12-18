@@ -28,7 +28,7 @@ chdir(const char *path) {
 
 int 
 mkdir(const char *dirname) {
-	char cur_path[MAXPATH];
+	char cur_path[MAXPATH] = {0};
 	if (dirname[0] != '/') {
 		getcwd(cur_path, MAXPATH);
 		strcat(cur_path, dirname);

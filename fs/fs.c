@@ -212,7 +212,7 @@ dir_lookup(struct File *dir, const char *name, struct File **file) {
 static int
 dir_alloc_file(struct File *dir, struct File **file) {
     char *blk;
-
+    
     assert((dir->f_size % BLKSIZE) == 0);
     blockno_t nblock = dir->f_size / BLKSIZE;
     for (blockno_t i = 0; i < nblock; i++) {
