@@ -155,8 +155,6 @@ umain(int argc, char **argv) {
 	}
 	close(f);
 	cprintf("operations with files in /dir is good\n");
-	char path[1000];
-	getcwd(path, 1000);
 	cprintf("removing /dir\n");
 	if ((f = remove("/dir")) < 0)  {
 		panic("remove /dir: %ld", (long)f);
