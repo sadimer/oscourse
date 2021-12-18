@@ -268,7 +268,7 @@ remove(const char *path) {
 }
 
 int 
-symlink(const char *symlink_path, const char *path) {
+    symlink(const char *symlink_path, const char *path) {
 	char cur_path[MAXPATH] = {0};
 	if (path[0] != '/') {
 		getcwd(cur_path, MAXPATH);
