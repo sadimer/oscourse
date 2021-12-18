@@ -346,9 +346,24 @@ umain(int argc, char **argv) {
     if ((f = open(file, O_RDWR | O_CREAT)) < 0) {
         panic("open /file: %ld", (long)f);
     }
+    if ((r = chmod(file, 3)) < 0) {
+        panic("chmod /file: %ld", (long)r);
+    }
+    if ((r = fstat(f, &st)) < 0) {
+		panic("stat /file: %ld", (long)r);
+	}
+	if (st.st_perm != 3) {
+		panic("wrong permissions in stat: %ld", (long)f);
+	}
     if ((r = chmod(file, 0)) < 0) {
         panic("chmod /file: %ld", (long)r);
     }
+    if ((r = fstat(f, &st)) < 0) {
+		panic("stat /file: %ld", (long)r);
+	}
+	if (st.st_perm != 0) {
+		panic("wrong permissions in stat: %ld", (long)f);
+	}
     if ((f = open(file, O_RDONLY)) >= 0) {
         close(f);
         panic("open /file on read: %ld", (long)f);
