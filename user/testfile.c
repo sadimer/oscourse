@@ -171,4 +171,94 @@ umain(int argc, char **argv) {
 	close(f);
 	cprintf("removing /dir is good\n");
     cprintf("dir simple test is good\n");
-}	
+
+
+    /* Simple test - create file, write something into it. Creat
+     * symlink. Read file from symlink. Write something into symlink
+     * Check the source file and compare it.
+     * After that delete source file. And open symlink. */
+    if ((f = open("/file", O_RDWR | O_CREAT)) < 0) {
+        panic("open /file: %ld", (long)f);
+    }
+    char buf2_copy[32],buf2[32] = "Hello world";
+    if ((r = write(f, buf2, sizeof(buf))) < 0) {
+        panic("write /file %ld", (long)r);
+    }
+    close(f);
+    cprintf("operations with files in /. is good\n");
+
+    cprintf("creating symlink\n");
+    if ((f = symlink("/copy","/file")) < 0)  {
+        panic("creat symlink /copy: %ld", (long)f);
+    }
+    cprintf("reading from symlink\n");
+    if ((f = open("/copy", O_RDWR)) < 0) {
+        panic("open /copy: %ld", (long)f);
+    }
+    if ((r = read(f, buf2_copy, sizeof(buf2))) < 0) {
+        panic("read /copy %ld", (long) r);
+    }
+    if (strcmp(buf2_copy,buf2)){
+        panic("file is different");
+    }
+    cprintf("read from symlink  /copy is good\n");
+
+//    char buf3_copy[32], buf3[32] = "World Hello"; // Не работает
+//    if ((r = write(f, buf3, sizeof(buf3))) < 0) {
+//        panic("write /copy %ld", (long) r);
+//    }
+    close(f);
+
+
+//    if ((f = open("/file", O_RDONLY)) < 0) {
+//        panic("open /file: %ld", (long)f);
+//    }
+//    if ((r = read(f, buf3_copy, sizeof(buf3_copy))) < 0) {
+//        panic("read /file %ld", (long) r);
+//    }
+//    cprintf("%s\n%s\n",buf3_copy,buf3);
+//    if (strcmp(buf3_copy,buf3)){
+//        cprintf("%s\n%s\n",buf3_copy,buf3);
+//        //panic("file is different");
+//    }
+//    cprintf("write into symlink  /copy is good\n");
+
+
+    cprintf("Situation when source file is deleted\n");
+    if ((f = remove("/file")) < 0)  {
+        panic("remove /copy: %ld", (long)f);
+    }
+    if ((f = open("/copy", O_RDONLY)) != -15) {
+        panic("open /copy: %ld", (long) f);
+    }
+    if ((f = remove("/file")) < 0)  {
+        panic("remove /copy: %ld", (long)f);
+    }
+    cprintf("open not existed file from symlink  /copy is failed\n");
+
+    cprintf("symlink test is good\n");
+
+
+    /* Open file dev/stdout. Write something into it. Call read function
+     * with descriptor number 1. Compare it with write text before.
+     *
+     */
+    if ((f = open("/dev/stdout", O_WRONLY)) < 0) {
+        panic("open /dev/stdout: %ld", (long)f);
+    }
+    if ((r = write(f, buf2, sizeof(buf))) < 0) {
+        panic("write /dev/stdout %ld", (long)r);
+    }
+    if ((r = read(1, buf2_copy, sizeof(buf))) < 0) {
+        panic("read 1 %ld", (long)r);
+    }
+    if (strcmp(buf2_copy,buf2)){
+        panic("file is different");
+    }
+    close(f);
+    cprintf("operations with files in /. is good\n");
+
+
+
+
+}
