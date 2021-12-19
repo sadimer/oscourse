@@ -554,7 +554,7 @@ move:
 }
 
 int 
-file_remove(const char *path)  {
+file_remove(const char *path) {
 	char *blk;
 	struct File *f, *dir;
 	struct File *tmp = NULL;
@@ -571,9 +571,12 @@ file_remove(const char *path)  {
 			tmp = (struct File*) blk;
 			for (blockno_t j = 0; j < BLKFILES; j++) {
 				if (tmp[j].f_name[0]) {
+					char new_path[MAXPATH] = {0};
 					cprintf("remove %s/%s with removing a directory\n", path, tmp[j].f_name);
-					file_set_size(&tmp[j], 0);
-					dir_remove_file(f, &tmp[j]);
+					strcat(new_path, path);
+					strcat(new_path, "/");
+					strcat(new_path, tmp[j].f_name);
+					file_remove(new_path);
 				}
 			}
 		}
