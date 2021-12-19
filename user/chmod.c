@@ -1,6 +1,7 @@
 #include <inc/lib.h>
 
-void umain(int argc, char **argv) {
+void 
+umain(int argc, char **argv) {
 	if (argc != 3) {
         printf("usage: chmod [permissions] [file name or path]\n");
         return;

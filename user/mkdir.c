@@ -1,6 +1,7 @@
 #include <inc/lib.h>
 
-void umain(int argc, char **argv) {
+void 
+umain(int argc, char **argv) {
     if (argc != 2) {
         printf("usage: mkdir [directory name or path]\n");
         return;

@@ -1,7 +1,8 @@
 #include <inc/lib.h>
 #define MAXPATH 1000
 
-int get_lastdir(const char *path) {
+int 
+get_lastdir(const char *path) {
 	int len = strlen(path);
 	int max_ind = 0;
 	for (int i = 0; i < len - 1; i++) {
@@ -11,7 +12,8 @@ int get_lastdir(const char *path) {
 	}
 	return max_ind;
 }
-void umain(int argc, char **argv) {
+void 
+umain(int argc, char **argv) {
     if (argc != 2) {
         printf("usage: cd [directory name]\n");
         return;
