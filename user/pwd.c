@@ -1,12 +1,11 @@
 #include <inc/lib.h>
-#define MAXPATH 1000
 
 void 
 umain(int argc, char **argv) {
-    char path[MAXPATH];
+    char path[MAXPATHLEN];
     if (argc > 1) {
         printf("usage: pwd\n");
 	} else {
-        printf("%s\n", getcwd(path, MAXPATH));
+        printf("%s\n", getcwd(path, MAXPATHLEN));
 	}
 }

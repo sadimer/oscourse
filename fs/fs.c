@@ -571,7 +571,7 @@ file_remove(const char *path) {
 			tmp = (struct File*) blk;
 			for (blockno_t j = 0; j < BLKFILES; j++) {
 				if (tmp[j].f_name[0]) {
-					char new_path[MAXPATH] = {0};
+					char new_path[MAXPATHLEN] = {0};
 					cprintf("remove %s/%s with removing a directory\n", path, tmp[j].f_name);
 					strcat(new_path, path);
 					strcat(new_path, "/");

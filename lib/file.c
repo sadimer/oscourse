@@ -43,6 +43,44 @@ struct Dev devfile = {
         .dev_write = devfile_write,
         .dev_trunc = devfile_trunc};
 
+
+int
+resolve_spec_symlinks(const char *path) {
+	int len = strlen(path);
+	if (len > 0) {
+		for (int i = 1; i < len; i++) {
+			if (path[i] == '/') {
+				char cd_path[MAXPATHLEN] = {0};
+				strcpy(cd_path, (char *)thisenv->workpath);
+				strcpy(cd_path, path);
+				cd_path[i] = '\0';
+				int res = chdir(cd_path, 1);
+				if (res < 0) {
+					return res;
+				}
+				if (i + 1 < len) {
+					resolve_spec_symlinks(&path[i + 1]);
+				}
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
+int
+get_name_from_path(char *name, const char *path) {
+	int index = 0;
+	int len = strlen(path);
+	for (int i = 0; i < len; i++) {
+		if (path[i] == '/') {
+			index = i;
+		}
+	}
+	strcpy(name, &path[index + 1]);
+	return 0;
+}
+
 /* Open a file (or directory).
  *
  * Returns:
@@ -73,26 +111,43 @@ open(const char *path, int mode) {
 	}
 	
     if ((res = fd_alloc(&fd)) < 0) return res;
-
-
-    strcpy(fsipcbuf.open.req_path, path);
+	
+	//char old[MAXPATHLEN] = {0};
+	char new[MAXPATHLEN] = {0};
+	//strcpy(old, (char *)thisenv->workpath);
+	
+	//char name[MAXPATHLEN] = {0};
+	//get_name_from_path(name, path);
+	
+	//if ((res = resolve_spec_symlinks(path)) < 0) return res;
+	
+	//strcpy(new, (char *)thisenv->workpath);
+	//strcat(new, name);
+	strcpy(new, (char *)path);
+	
+    strcpy(fsipcbuf.open.req_path, new);
     fsipcbuf.open.req_omode = mode;
     
     if ((res = fsipc(FSREQ_OPEN, fd)) < 0) {
         fd_close(fd, 0);
         return res;
     }
-    if (!strcmp(path, "/dev/stdin")) {
+    if (!strcmp(new, "/dev/stdin")) {
 		fd_close(fd, 0);
+		//sys_env_set_workpath(thisenv->env_id, old);
 		return 0;
-	} else if (!strcmp(path, "/dev/stdout")) {
+	} else if (!strcmp(new, "/dev/stdout")) {
 		fd_close(fd, 0);
+		//sys_env_set_workpath(thisenv->env_id, old);
 		return 1;
-	} else if (!strcmp(path, "/dev/stderr")) {
+	} else if (!strcmp(new, "/dev/stderr")) {
 		fd_close(fd, 0);
+		//sys_env_set_workpath(thisenv->env_id, old);
 		return 2;
 	}
-
+	
+	//sys_env_set_workpath(thisenv->env_id, old);
+	
     return fd2num(fd);
 }
 
@@ -214,9 +269,9 @@ sync(void) {
 
 int
 chmod(const char *path, int perm) {
-	char cur_path[MAXPATH] = {0};
+	char cur_path[MAXPATHLEN] = {0};
 	if (path[0] != '/') {
-		getcwd(cur_path, MAXPATH);
+		getcwd(cur_path, MAXPATHLEN);
 		strcat(cur_path, path);
 	} else {
 		strcat(cur_path, path);
@@ -231,9 +286,9 @@ chmod(const char *path, int perm) {
 
 int
 remove(const char *path) {
-	char cur_path[MAXPATH] = {0};
+	char cur_path[MAXPATHLEN] = {0};
 	if (path[0] != '/') {
-		getcwd(cur_path, MAXPATH);
+		getcwd(cur_path, MAXPATHLEN);
 		strcat(cur_path, path);
 	} else {
 		strcat(cur_path, path);
@@ -248,16 +303,16 @@ remove(const char *path) {
 
 int 
 symlink(const char *symlink_path, const char *path) {
-	char cur_path[MAXPATH] = {0};
+	char cur_path[MAXPATHLEN] = {0};
 	if (path[0] != '/') {
-		getcwd(cur_path, MAXPATH);
+		getcwd(cur_path, MAXPATHLEN);
 		strcat(cur_path, path);
 	} else {
 		strcat(cur_path, path);
 	}
-	char symlink_cur_path[MAXPATH] = {0};
+	char symlink_cur_path[MAXPATHLEN] = {0};
 	if (symlink_path[0] != '/') {
-		getcwd(symlink_cur_path, MAXPATH);
+		getcwd(symlink_cur_path, MAXPATHLEN);
 		strcat(symlink_cur_path, symlink_path);
 	} else {
 		strcat(symlink_cur_path, symlink_path);

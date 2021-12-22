@@ -1,5 +1,4 @@
 #include <inc/lib.h>
-#define MAXPATH 1000
 
 int flag[256];
 
@@ -12,7 +11,7 @@ ls(const char *path, const char *prefix) {
     struct Stat st;
 
     if ((r = stat(path, &st)) < 0)
-        panic("stat %s: %i", path, r);
+        printf("stat %s: %i", path, r);
     if (st.st_isdir && !flag['d'])
         lsdir(path, prefix);
     else
@@ -25,7 +24,7 @@ lsdir(const char *path, const char *prefix) {
     struct File f;
 
     if ((fd = open(path, O_RDONLY)) < 0)
-        panic("open %s: %i", path, fd);
+        printf("open %s: %i", path, fd);
     while ((n = readn(fd, &f, sizeof f)) == sizeof f)
         if (f.f_name[0])
             ls1(prefix, f.f_type == FTYPE_DIR, f.f_size, f.f_name, f.f_perm, f.f_type == FTYPE_LINK);
@@ -79,8 +78,8 @@ umain(int argc, char **argv) {
         }
 
     if (argc == 1) {
-		char path[MAXPATH];
-		getcwd(path, MAXPATH);
+		char path[MAXPATHLEN];
+		getcwd(path, MAXPATHLEN);
         ls(path, "");
 	}
     else {

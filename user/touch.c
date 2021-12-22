@@ -1,17 +1,16 @@
 #include <inc/lib.h>
-#define MAXPATH 1000
 
 void umain(int argc, char **argv)
 {
     char *filename;
-    char path[MAXPATH];
+    char path[MAXPATHLEN];
     if (argc != 2) {
         printf("usage: touch [filename]\n");
         return;
     }
     filename = argv[1];
     if (*filename != '/') {
-        getcwd(path, MAXPATH);
+        getcwd(path, MAXPATHLEN);
 	}
     strcat(path, filename);
     int res = open(path, O_CREAT);

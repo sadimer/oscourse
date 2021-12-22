@@ -172,12 +172,10 @@ serve_open(envid_t envid, struct Fsreq_open *req,
     }
 
 	if (f->f_type == FTYPE_LINK && !(req->req_omode & O_SYSTEM)) {
-		char cur_path[MAXPATH] = {0};
+		char cur_path[MAXPATHLEN] = {0};
 		file_read(f, cur_path, sizeof(cur_path), 0);
-		if ((res = file_open(cur_path, &f)) < 0) {
-			if (debug) cprintf("file_open failed: %i", res);
-			return res;
-		}
+		memmove(path, cur_path, MAXPATHLEN);
+		goto try_open;
 	}
 	
 	if (f->f_type == FTYPE_DIR && !(req->req_omode & O_SYSTEM)) {

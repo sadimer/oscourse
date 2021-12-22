@@ -174,15 +174,16 @@ umain(int argc, char **argv) {
 	
 	/* Simple test - change dir. Check pwd. */
 	cprintf("change directory check\n");
-	if ((r = chdir(dir)) < 0) {
+	if ((r = chdir(dir, 0)) < 0) {
         panic("cd /dir %ld", (long)r);
     }
     memset(buf, 0, sizeof(buf));
     getcwd(buf, 512);
-    if (strcmp(buf, dir)) {
+    char dir1[32] = "/dir/";
+    if (strcmp(buf, dir1)) {
         panic("fail to get pwd of /dir %ld", (long)r);
     }
-    if ((r = chdir(src)) < 0) {
+    if ((r = chdir(src, 0)) < 0) {
         panic("cd / %ld", (long)r);
     }
     cprintf("change directory check is good\n");
@@ -315,10 +316,10 @@ umain(int argc, char **argv) {
     if ((f = symlink(copy, dir)) < 0)  {
         panic("creat symlink /copy: %ld", (long)f);
     }
-	if ((r = chdir(copy)) < 0) {
+	if ((r = chdir(copy, 0)) < 0) {
         panic("cd /dir %ld", (long)r);
     }
-    if ((r = chdir(src)) < 0) {
+    if ((r = chdir(src, 0)) < 0) {
         panic("cd / %ld", (long)r);
     }
     if ((f = open(copy, O_RDWR)) >= 0) {
