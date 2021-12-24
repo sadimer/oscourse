@@ -6,10 +6,18 @@ void
 cat(int f, char *s) {
     long n;
     int r;
-
-    while ((n = read(f, buf, (long)sizeof(buf))) > 0)
+    while ((n = read(f, buf, (long)sizeof(buf))) > 0) {
+		if (f == 0) {
+			int len = strlen(buf);
+			for (int i = 0; i < len; i++) {
+				if (buf[i] == 13) {
+					buf[i] = '\n';
+				}
+			}
+		}
         if ((r = write(1, buf, n)) != n)
             panic("write error copying %s: %i", s, r);
+	}
     if (n < 0)
         panic("error reading %s: %i", s, (int)n);
 }

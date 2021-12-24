@@ -159,6 +159,11 @@ open(const char *path, int mode) {
         return -E_BAD_PATH;
 	}
 	
+	if (*strfind(path, '#') != '\0') {
+		cprintf("please don't use # in filenames\n");
+		return -E_BAD_PATH;
+	}
+	
     if ((res = fd_alloc(&fd)) < 0) return res;
 	
 	char cur_path[MAXPATHLEN] = {0};
@@ -185,12 +190,24 @@ open(const char *path, int mode) {
         return res;
     }
     if (!strcmp(new, "/dev/stdin")) {
+		if (mode & O_SPAWN) {
+			cprintf("don't try to exec device files\n");
+			return -E_INVAL;
+		}
 		fd_close(fd, 0);
 		return 0;
 	} else if (!strcmp(new, "/dev/stdout")) {
+		if (mode & O_SPAWN) {
+			cprintf("don't try to exec device files\n");
+			return -E_INVAL;
+		}
 		fd_close(fd, 0);
 		return 1;
 	} else if (!strcmp(new, "/dev/stderr")) {
+		if (mode & O_SPAWN) {
+			cprintf("don't try to exec device files\n");
+			return -E_INVAL;
+		}
 		fd_close(fd, 0);
 		return 2;
 	}

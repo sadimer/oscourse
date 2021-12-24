@@ -250,7 +250,7 @@ void
 umain(int argc, char **argv) {
     int r, interactive, echocmds;
     struct Argstate args;
-	
+    
     interactive = '?';
     echocmds = 0;
     argstart(&argc, argv, &args);

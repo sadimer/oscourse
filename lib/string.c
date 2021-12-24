@@ -324,3 +324,26 @@ strtok(char *s, char *delim) {
 		s++;
 	}
 }
+
+char *
+strstr (char *haystack, char *needle) {
+	char *needle_ptr = NULL, *haystack_ptr = NULL;
+ 
+	if (haystack == NULL || needle == NULL)
+		return NULL;
+ 
+	while (*haystack) {
+		if (*haystack == *needle) {
+			int trigger_out = 1;
+			needle_ptr = needle;
+			haystack_ptr = haystack;
+			while (*needle_ptr && *haystack_ptr) {
+				trigger_out = trigger_out && (*needle_ptr == *haystack_ptr);
+			}
+			if (trigger_out)
+				return haystack;
+		}
+		++haystack;
+	}
+	return NULL;
+}

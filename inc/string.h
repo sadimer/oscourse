@@ -23,6 +23,7 @@ void *memfind(const void *s, int c, size_t len);
 
 long strtol(const char *s, char **endptr, int base);
 char *strtok(char *s, char *delim);
+char *strstr (char *haystack, char *needle);
 
 char *strdup(const char *src);
 #endif /* not JOS_INC_STRING_H */
