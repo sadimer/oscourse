@@ -58,8 +58,8 @@ umain(int argc, char **argv) {
     if ((r = dup(0, 2)) < 0)
         panic("dup: %i", r);
        
-    if ((r = mkdir("/dev") < 0))
-		panic("cant make /dev\n");
+	if ((r = mkdir("/dev") < 0))
+		panic("cant make /dev %i\n", r);
 	if ((r = open("/dev/stdin", O_CREAT) < 0)) 
 		panic("cant make stdin\n");
 	if ((r = open("/dev/stdout", O_CREAT) < 0))

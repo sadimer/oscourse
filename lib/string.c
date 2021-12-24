@@ -279,3 +279,48 @@ strtol(const char *s, char **endptr, int base) {
 
     return (neg ? -val : val);
 }
+
+bool
+is_delim(char c, char *delim) {
+	while(*delim != '\0') {
+		if(c == *delim)
+			return true;
+		delim++;
+	}
+	return false;
+}
+
+char *
+strtok(char *s, char *delim) {
+	static char *p; // start of the next search 
+	if (!s) {
+		s = p;
+	}
+	if (!s) {
+		return NULL;
+	}
+	while(1) {
+		if (is_delim(*s, delim)) {
+			s++;
+			continue;
+		}
+		if(*s == '\0') {
+		  return NULL;
+		}
+		break;
+	}
+
+	char *ret = s;
+	while(1) {
+		if(*s == '\0') {
+			p = s; // next exec will return NULL
+			return ret;
+		}
+		if(is_delim(*s, delim)) {
+			*s = '\0';
+			p = s + 1;
+			return ret;
+		}
+		s++;
+	}
+}

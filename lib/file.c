@@ -4,6 +4,8 @@
 
 union Fsipc fsipcbuf __attribute__((aligned(PAGE_SIZE)));
 
+
+char tokens[MAXPATHLEN][MAXNAMELEN] = {0};
 /* Send an inter-environment request to the file server, and wait for
  * a reply.  The request body should be in fsipcbuf, and parts of the
  * response may be written back to fsipcbuf.
@@ -43,41 +45,88 @@ struct Dev devfile = {
         .dev_write = devfile_write,
         .dev_trunc = devfile_trunc};
 
-
 int
-resolve_spec_symlinks(const char *path) {
+skip_dots(char *new, const char *path) {
 	int len = strlen(path);
-	if (len > 0) {
-		for (int i = 1; i < len; i++) {
-			if (path[i] == '/') {
-				char cd_path[MAXPATHLEN] = {0};
-				strcpy(cd_path, (char *)thisenv->workpath);
-				strcpy(cd_path, path);
-				cd_path[i] = '\0';
-				int res = chdir(cd_path, 1);
-				if (res < 0) {
-					return res;
-				}
-				if (i + 1 < len) {
-					resolve_spec_symlinks(&path[i + 1]);
-				}
-				break;
-			}
+	for (int i = 0, j = 0; i < len; i++) {
+		if (path[i] == '/' && path[i + 1] == '.' && i == len - 2) {
+			return 0;
 		}
+		if (path[i] == '/' && path[i + 1] == '.' && path[i + 2] == '/') {
+			new[j] = '/';
+			j++;
+			i = i + 1;
+			continue;
+		}
+		new[j] = path[i];
+		j++;
 	}
 	return 0;
 }
 
 int
-get_name_from_path(char *name, const char *path) {
-	int index = 0;
+skip_doubledots(char *new, const char *path) {
 	int len = strlen(path);
-	for (int i = 0; i < len; i++) {
-		if (path[i] == '/') {
-			index = i;
+	char tmp[MAXPATHLEN] = {0};
+	strcpy(tmp, path);
+	int skip = 0;
+	for (int i = len - 1; i >= 0; i--) {
+		if (tmp[i] == '.' && tmp[i - 1] == '.' && tmp[i - 2] == '/') {
+			skip = 1;
+			tmp[i] = '#';
+			tmp[i - 1] = '#';
+			i = i - 1;
+			continue;
+		}
+		if (tmp[i] == '/' && tmp[i - 1] == '.' && tmp[i - 2] == '.' && tmp[i - 3] == '/') {
+			skip++;
+			tmp[i - 2] = '#';
+			tmp[i - 1] = '#';
+			i = i - 2;
+			continue;
+		}
+		if (tmp[i] == '/' && skip > 0) {
+			if (i == 0) {
+				break;
+			}
+			i--;
+			while (tmp[i] != '/') {
+				tmp[i] = '#';
+				i--;
+			}
+			i++;
+			skip--;
 		}
 	}
-	strcpy(name, &path[index + 1]);
+	for (int i = 0, j = 0; i < len; i++) { 
+		if (tmp[i] != '#') {
+			new[j] = tmp[i];
+			j++;
+		}
+	}
+	memset(tmp, 0, MAXPATHLEN);
+	beauty_path(tmp, new);
+	strcpy(new, tmp);
+	return 0;
+}
+
+
+int 
+beauty_path(char *new, const char *path) {
+	char tmp[MAXPATHLEN] = {0};
+	skip_dots(tmp, path);
+	int len = strlen(tmp);
+	for (int i = 0, j = 0; i < len; i++) {
+		if (tmp[i] == '/') {
+			new[j] = tmp[i];
+			j++;
+		}
+		while (tmp[i] == '/') {
+			i++;
+		}
+		new[j] = tmp[i];
+		j++;
+	}
 	return 0;
 }
 
@@ -112,18 +161,21 @@ open(const char *path, int mode) {
 	
     if ((res = fd_alloc(&fd)) < 0) return res;
 	
-	//char old[MAXPATHLEN] = {0};
+	char cur_path[MAXPATHLEN] = {0};
 	char new[MAXPATHLEN] = {0};
-	//strcpy(old, (char *)thisenv->workpath);
+    char tmp[MAXPATHLEN] = {0};
+    
+    if (path[0] != '/') {
+		getcwd(cur_path, MAXPATHLEN);
+		strcat(cur_path, path);
+	} else {
+		strcat(cur_path, path);
+	}
 	
-	//char name[MAXPATHLEN] = {0};
-	//get_name_from_path(name, path);
+	beauty_path(new, cur_path);
 	
-	//if ((res = resolve_spec_symlinks(path)) < 0) return res;
-	
-	//strcpy(new, (char *)thisenv->workpath);
-	//strcat(new, name);
-	strcpy(new, (char *)path);
+	skip_doubledots(tmp, new);
+	strcpy(new, tmp);
 	
     strcpy(fsipcbuf.open.req_path, new);
     fsipcbuf.open.req_omode = mode;
@@ -134,19 +186,14 @@ open(const char *path, int mode) {
     }
     if (!strcmp(new, "/dev/stdin")) {
 		fd_close(fd, 0);
-		//sys_env_set_workpath(thisenv->env_id, old);
 		return 0;
 	} else if (!strcmp(new, "/dev/stdout")) {
 		fd_close(fd, 0);
-		//sys_env_set_workpath(thisenv->env_id, old);
 		return 1;
 	} else if (!strcmp(new, "/dev/stderr")) {
 		fd_close(fd, 0);
-		//sys_env_set_workpath(thisenv->env_id, old);
 		return 2;
 	}
-	
-	//sys_env_set_workpath(thisenv->env_id, old);
 	
     return fd2num(fd);
 }

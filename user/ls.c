@@ -9,13 +9,16 @@ void
 ls(const char *path, const char *prefix) {
     int r;
     struct Stat st;
-
-    if ((r = stat(path, &st)) < 0)
-        printf("stat %s: %i", path, r);
+	char new[MAXPATHLEN] = {0};
+	char new_prefix[MAXPATHLEN] = {0};
+	beauty_path(new, path);
+	beauty_path(new_prefix, prefix);
+    if ((r = stat(new, &st)) < 0)
+        printf("stat %s: %i", new, r);
     if (st.st_isdir && !flag['d'])
-        lsdir(path, prefix);
+        lsdir(new, new_prefix);
     else
-        ls1(0, st.st_isdir, st.st_size, path, st.st_perm, st.st_issym);
+        ls1(0, st.st_isdir, st.st_size, new, st.st_perm, st.st_issym);
 }
 
 void

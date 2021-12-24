@@ -26,9 +26,11 @@ chdir(const char *path, int mode) {
 	if (!st.st_isdir) {
 		return -E_INVAL;
 	}
-	if (cur_path[strlen(cur_path) - 1] == '.' && cur_path[strlen(cur_path) - 2] == '/') {
-		cur_path[strlen(cur_path) - 1] = '\0';
-	}
+	char new[MAXPATHLEN] = {0};
+	char tmp[MAXPATHLEN] = {0};
+	beauty_path(new, cur_path);
+	skip_doubledots(tmp, new);
+	strcpy(cur_path, tmp);
 	if (cur_path[strlen(cur_path) - 1] != '/') {
 		strcat((char *)cur_path, "/");
 	}
@@ -39,7 +41,6 @@ chdir(const char *path, int mode) {
 int 
 mkdir(const char *dirname) {
 	char cur_path[MAXPATHLEN] = {0};
-	char copy[MAXPATHLEN] = {0};
 	if (dirname[0] != '/') {
 		getcwd(cur_path, MAXPATHLEN);
 		strcat(cur_path, dirname);
@@ -51,11 +52,5 @@ mkdir(const char *dirname) {
 		return res;
 	}
 	close(res);
-	strcat(copy, cur_path);
-	strcat(copy, "/.");
-	res = symlink(copy, cur_path);
-	if (res < 0) {
-		return res;
-	}
 	return 0;
 }
