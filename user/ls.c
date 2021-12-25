@@ -14,7 +14,7 @@ ls(const char *path, const char *prefix) {
 	beauty_path(new, path);
 	beauty_path(new_prefix, prefix);
     if ((r = stat(new, &st)) < 0)
-        printf("stat %s: %i", new, r);
+        printf("stat %s: %i\n", new, r);
     if (st.st_isdir && !flag['d'])
         lsdir(new, new_prefix);
     else
@@ -26,15 +26,15 @@ lsdir(const char *path, const char *prefix) {
     int fd, n;
     struct File f;
 
-    if ((fd = open(path, O_RDONLY)) < 0)
-        printf("open %s: %i", path, fd);
+    if ((fd = open(path, O_RDWR)) < 0)
+        printf("open %s: %i\n", path, fd);
     while ((n = readn(fd, &f, sizeof f)) == sizeof f)
         if (f.f_name[0])
             ls1(prefix, f.f_type == FTYPE_DIR, f.f_size, f.f_name, f.f_perm, f.f_type == FTYPE_LINK);
     if (n > 0)
-        panic("short read in directory %s", path);
+        printf("short read in directory %s\n", path);
     if (n < 0)
-        panic("error reading directory %s: %i", path, n);
+        printf("error reading directory %s: %i\n", path, n);
 }
 
 

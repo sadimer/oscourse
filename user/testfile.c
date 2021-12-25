@@ -149,11 +149,6 @@ umain(int argc, char **argv) {
 		cprintf("creat /dir: %ld\n", (long)f);
 		return;
 	}
-	if ((f = open(dir, O_RDWR)) >= 0) {
-		close(f);
-        cprintf("open /dir on write: %ld\n", (long)f);
-        return;
-	}
 	if ((f = open(dir, O_WRONLY)) >= 0) {
 		close(f);
         cprintf("open /dir on write: %ld\n", (long)f);
@@ -361,11 +356,6 @@ umain(int argc, char **argv) {
         cprintf("cd / %ld\n", (long)r);
         return;
     }
-    if ((f = open(copy, O_RDWR)) >= 0) {
-		close(f);
-        cprintf("open /dir on write: %ld\n", (long)f);
-        return;
-	}
 	if ((f = open(copy, O_WRONLY)) >= 0) {
 		close(f);
         cprintf("open /dir on write: %ld\n", (long)f);

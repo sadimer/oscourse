@@ -102,7 +102,7 @@ serve_open(envid_t envid, struct Fsreq_open *req,
     /* Copy in the path, making sure it's null-terminated */
     memmove(path, req->req_path, MAXPATHLEN);
     path[MAXPATHLEN - 1] = 0;
-
+	
     /* Find an open file ID */
     if ((res = openfile_alloc(&o)) < 0) {
         if (debug) cprintf("openfile_alloc failed: %i", res);
@@ -138,20 +138,53 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             return res;
         }
     }
-    if (!(req->req_omode & O_SPAWN)) {
-		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
-			cprintf("you have not permissions to read this file\n");
+    if (f->f_type != FTYPE_DIR) {	
+		/*int i;
+		struct Stat st;
+		cprintf("%s\n", path);
+		int len = strlen(path);
+		for (i = len - 2; i >= 0; i--) {
+			if (path[i] == '/') {
+				path[i] = '\0';
+				break;
+			}
+		}
+		cprintf("%s\n", path);
+		if (path[0] != '\0') {
+			if ((res = stat(path, &st)) < 0) {
+				cprintf("stat %s: %i\n", path, res);
+				return res;
+			}
+			if (!(st.st_perm & PERM_WRITE)) {
+				cprintf("you have not permissions to write to files in dir\n");
+				return -E_INVAL;
+			}
+		}
+		path[i] = '/'; */
+		if (!(req->req_omode & O_SPAWN)) {
+			if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
+				cprintf("you have not permissions to read this file\n");
+				return -E_INVAL;
+			}
+		} else {
+			if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_EXEC) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
+				cprintf("you have not permissions to execute this file\n");
+				return -E_INVAL;
+			}
+		}
+		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_WRITE) && ((req->req_omode & O_ACCMODE) == O_WRONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
+			cprintf("you have not permissions to write to this file\n");
 			return -E_INVAL;
 		}
 	} else {
-		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_EXEC) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
-			cprintf("you have not permissions to execute this file\n");
+		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_EXEC) && (req->req_omode & O_ACCMODE) == O_RDONLY) {
+			cprintf("you have not permissions to change dir\n");
 			return -E_INVAL;
 		}
-	}
-	if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_WRITE) && ((req->req_omode & O_ACCMODE) == O_WRONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
-		cprintf("you have not permissions to write to this file\n");
-		return -E_INVAL;
+		if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && (req->req_omode & O_ACCMODE) == O_RDWR) {
+			cprintf("you have not permissions to read dir\n");
+			return -E_INVAL;
+		}
 	}
 	if (req->req_omode & O_CHMOD) {
         if ((res = file_set_perm(f, (req->req_omode & 0x70) >> 0x4)) < 0) {
@@ -185,10 +218,6 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 		}
 		if ((req->req_omode & O_ACCMODE) == O_WRONLY) {
 			cprintf("you cant write to directory\n");
-			return -E_INVAL;
-		}
-		if ((req->req_omode & O_ACCMODE) == O_RDWR) {
-			cprintf("you cant read/write from directory\n");
 			return -E_INVAL;
 		}
 	}

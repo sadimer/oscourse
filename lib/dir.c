@@ -19,10 +19,16 @@ chdir(const char *path, int mode) {
 		strcat(cur_path, path);
 	}
 	struct Stat st;
-	int res = stat(cur_path, &st);
+	int fd;
+	if ((fd = open(cur_path, O_RDONLY)) < 0) {
+        printf("open %s: %i\n", cur_path, fd);
+        return fd;
+	}
+	int res = fstat(fd, &st);
 	if (res < 0) {
 		return res;
 	}
+	close(fd);
 	if (!st.st_isdir) {
 		return -E_INVAL;
 	}
