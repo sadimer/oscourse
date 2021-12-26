@@ -103,12 +103,54 @@ serve_open(envid_t envid, struct Fsreq_open *req,
     memmove(path, req->req_path, MAXPATHLEN);
     path[MAXPATHLEN - 1] = 0;
 	
+	int last = 0;
+	
     /* Find an open file ID */
     if ((res = openfile_alloc(&o)) < 0) {
         if (debug) cprintf("openfile_alloc failed: %i", res);
         return res;
     }
-
+    
+	int i;
+	struct File *d;
+	int len;
+	int flag;
+try_link: 
+	flag = 0;
+	len = strlen(path);
+	for (i = 1; i < len - 1; i++) {
+		if (path[i] == '/' && i > last) {
+			path[i] = '\0';
+			flag = 1;
+			break;
+		}
+	}
+	if (flag == 1) {
+		if ((res = file_open(path, &d)) < 0) {
+			if (debug) cprintf("file_open failed: %i", res);
+				return res;
+		}
+		path[i] = '/';
+		if (d->f_type == FTYPE_LINK) {
+			char cur_path[MAXPATHLEN] = {0};
+			char tmp[MAXPATHLEN] = {0};
+			strcpy(tmp, path);
+			file_read(d, cur_path, sizeof(cur_path), 0);
+			memmove(path, cur_path, MAXPATHLEN);
+			if (strcmp(path, "/")) {
+				strcat(path, &tmp[i]);
+			} else {
+				strcat(path, &tmp[i + 1]);
+			}
+			flag = 0;
+			goto try_link;
+		} else {
+			last = i;
+			flag = 0;
+			goto try_link;
+		}
+	}
+	
     /* Open the file */
     if (req->req_omode & O_CREAT) {
         if ((res = file_create(path, &f)) < 0) {
@@ -132,22 +174,29 @@ serve_open(envid_t envid, struct Fsreq_open *req,
             return res;
         }
     } else {
-    try_open:
-        if ((res = file_open(path, &f)) < 0) {
-            if (debug) cprintf("file_open failed: %i", res);
-            return res;
-        }
+try_open:
+		if ((res = file_open(path, &f)) < 0) {
+			if (debug) cprintf("file_open failed: %i", res);
+				return res;
+		}
     }
     if (f->f_type != FTYPE_DIR) {	
 		int i;
 		struct File *d;
-		cprintf("%s\n", path);
 		int len = strlen(path);
 		for (i = len - 2; i >= 0; i--) {
+			if (i == 0) {
+				break;
+			}
 			if (path[i] == '/') {
 				path[i] = '\0';
 				break;
 			}
+		}
+		char tmp = '/';
+		if (i == 0) {
+			tmp = path[i + 1];
+			path[i + 1] = '\0';
 		}
 		if ((res = file_open(path, &d)) < 0) {
             if (debug) cprintf("file_open failed: %i", res);
@@ -161,7 +210,11 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 			cprintf("you have not permissions to use files in this directory\n");
 			return -E_INVAL;
 		}
-		path[i] = '/'; 
+		if (i == 0) {
+			path[i + 1] = tmp;
+		} else {
+			path[i] = '/';
+		}
 		if (!(req->req_omode & O_SPAWN)) {
 			if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
 				cprintf("you have not permissions to read this file\n");
