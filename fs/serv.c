@@ -139,8 +139,8 @@ serve_open(envid_t envid, struct Fsreq_open *req,
         }
     }
     if (f->f_type != FTYPE_DIR) {	
-		/*int i;
-		struct Stat st;
+		int i;
+		struct File *d;
 		cprintf("%s\n", path);
 		int len = strlen(path);
 		for (i = len - 2; i >= 0; i--) {
@@ -149,18 +149,19 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 				break;
 			}
 		}
-		cprintf("%s\n", path);
-		if (path[0] != '\0') {
-			if ((res = stat(path, &st)) < 0) {
-				cprintf("stat %s: %i\n", path, res);
-				return res;
-			}
-			if (!(st.st_perm & PERM_WRITE)) {
-				cprintf("you have not permissions to write to files in dir\n");
-				return -E_INVAL;
-			}
+		if ((res = file_open(path, &d)) < 0) {
+            if (debug) cprintf("file_open failed: %i", res);
+            return res;
+        }
+        if (d->f_type != FTYPE_DIR) {
+			cprintf("no such directory\n");
+			return -E_INVAL;
 		}
-		path[i] = '/'; */
+		if (!(d->f_perm & PERM_WRITE)) {
+			cprintf("you have not permissions to use files in this directory\n");
+			return -E_INVAL;
+		}
+		path[i] = '/'; 
 		if (!(req->req_omode & O_SPAWN)) {
 			if (!(req->req_omode & O_CHMOD) && !(f->f_perm & PERM_READ) && ((req->req_omode & O_ACCMODE) == O_RDONLY || (req->req_omode & O_ACCMODE) == O_RDWR)) {
 				cprintf("you have not permissions to read this file\n");

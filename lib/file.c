@@ -357,7 +357,11 @@ remove(const char *path) {
 	} else {
 		strcat(cur_path, path);
 	}
-	strcpy(fsipcbuf.remove.req_path, cur_path);
+	char new[MAXPATHLEN] = {0};
+	char tmp[MAXPATHLEN] = {0};
+	beauty_path(new, cur_path);
+	skip_doubledots(tmp, new);
+	strcpy(fsipcbuf.remove.req_path, tmp);
 	int res = fsipc(FSREQ_REMOVE, NULL);
 	if (res < 0) {
 		return res;
