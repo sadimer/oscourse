@@ -178,7 +178,6 @@ int mkdir(const char *dirname);
 #define O_TRUNC 0x0200 /* truncate to zero length */
 #define O_EXCL  0x0400 /* error if already exists */
 #define O_MKDIR 0x0800 /* create directory, not regular file */
-#define O_CHDIR 0x0080 /* change dir */
 #define O_CHMOD 0x1000 /* change file permissions */
 #define O_MKLINK 0x2000 /* create symlink */
 #define O_SYSTEM 0x4000 /* for read/write information to symlinks */

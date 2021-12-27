@@ -125,7 +125,7 @@ runit:
      * Read all commands from the filesystem: add an initial '/' to
      * the command name.
      * This essentially acts like 'PATH=/'. */
-    if (argv[0][0] != '/') {
+    if (argv[0][0] != '/' && argv[0][0] != '.') {
         argv0buf[0] = '/';
         strcpy(argv0buf + 1, argv[0]);
         argv[0] = argv0buf;
@@ -245,6 +245,7 @@ usage(void) {
     cprintf("usage: sh [-dix] [command-file]\n");
     exit();
 }
+
 
 void
 umain(int argc, char **argv) {

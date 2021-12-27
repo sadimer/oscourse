@@ -77,7 +77,13 @@ spawn(const char *prog, const char **argv) {
      *   - Start the child process running with sys_env_set_status(). */
 
     // TODO Properly load ELF and check errors
-
+    
+    if (!strcmp(prog, "/cd") || !strcmp(prog, "cd")) {
+		int res = chdir(argv[1], 0);
+		if (res < 0) {
+			return res;
+		}
+	}
     int fd = open(prog, O_RDONLY | O_SPAWN);
     if (fd < 0) return fd;
 
@@ -85,7 +91,7 @@ spawn(const char *prog, const char **argv) {
     struct Elf *elf = (struct Elf *)elf_buf;
     res = readn(fd, elf_buf, sizeof(elf_buf));
     if (res != sizeof(elf_buf)) {
-        cprintf("Wrong ELF header size or read error: %i\n", res);
+        cprintf("wrong ELF header size or read error: %i\n", res);
         close(fd);
         return -E_NOT_EXEC;
     }
@@ -95,7 +101,7 @@ spawn(const char *prog, const char **argv) {
         elf->e_elf[2] != 1 /* version 1 */ ||
         elf->e_type != ET_EXEC /* executable */ ||
         elf->e_machine != 0x3E /* amd64 */) {
-        cprintf("Elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
+        cprintf("elf magic %08x want %08x\n", elf->e_magic, ELF_MAGIC);
         close(fd);
         return -E_NOT_EXEC;
     }
