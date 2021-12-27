@@ -53,7 +53,7 @@ mkdir(const char *dirname) {
 	} else {
 		strcat(cur_path, dirname);
 	}
-	int res = open(cur_path, O_MKDIR | O_SYSTEM);
+	int res = open(cur_path, O_MKDIR | O_SYSTEM | O_EXCL);
 	if (res < 0) {
 		return res;
 	}
